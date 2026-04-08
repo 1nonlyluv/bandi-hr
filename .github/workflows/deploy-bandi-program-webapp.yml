@@ -45,7 +45,6 @@ jobs:
         working-directory: bandi_program
         run: |
           python3 build_program_schedule_workbook_jsons.py \
-            "주간프로그램 계획표(2026).xlsx" \
             --output-dir data/generated
 
       - name: Build webapp bundle

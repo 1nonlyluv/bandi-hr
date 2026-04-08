@@ -8,6 +8,16 @@ from program_schedule_normalizer import normalize_payload
 from program_schedule_parser import parse_program_workbook
 
 
+def autodetect_workbook_path(base_dir: str | Path = ".") -> Path:
+    root = Path(base_dir)
+    candidates = sorted(root.glob("*2026*.xlsx"))
+    preferred = [path for path in candidates if "(2026)" in path.name]
+    picked = preferred[0] if preferred else (candidates[0] if candidates else None)
+    if picked is None:
+        raise FileNotFoundError("No 2026 workbook .xlsx file found.")
+    return picked
+
+
 def ascii_week_suffix(value: str) -> str:
     digits = [part for part in "".join(char if char.isdigit() else " " for char in value).split() if part]
     if len(digits) >= 2:
@@ -47,14 +57,15 @@ def build_workbook_jsons(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build weekly program JSON files from all week tabs in a workbook.")
-    parser.add_argument("xlsx_path", help="Source XLSX workbook path.")
+    parser.add_argument("xlsx_path", nargs="?", help="Source XLSX workbook path. If omitted, auto-detect a 2026 workbook in the current directory.")
     parser.add_argument("--output-dir", default="data/generated", help="Directory to write JSON files into.")
     parser.add_argument("--prefix", default="program_schedule_workbook_", help="Filename prefix for generated JSON files.")
     parser.add_argument("--no-clean", action="store_true", help="Do not remove previous generated files with the same prefix.")
     args = parser.parse_args()
 
+    workbook_path = args.xlsx_path or str(autodetect_workbook_path("."))
     written_paths = build_workbook_jsons(
-        args.xlsx_path,
+        workbook_path,
         output_dir=args.output_dir,
         prefix=args.prefix,
         clean=not args.no_clean,
