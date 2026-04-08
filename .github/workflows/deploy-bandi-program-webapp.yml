@@ -6,8 +6,12 @@ name: Deploy Bandi Program Webapp
       - main
     paths:
       - "bandi_program/webapp/**"
+      - "bandi_program/*.xlsx"
       - "bandi_program/data/generated/program_schedule_week*.json"
+      - "bandi_program/build_program_schedule_workbook_jsons.py"
       - "bandi_program/build_program_schedule_bundle.py"
+      - "bandi_program/program_schedule_parser.py"
+      - "bandi_program/program_schedule_normalizer.py"
       - "bandi_program/write_webapp_version.py"
       - ".github/workflows/deploy-bandi-program-webapp.yml"
   workflow_dispatch:
@@ -36,11 +40,18 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Build workbook week JSONs
+        working-directory: bandi_program
+        run: |
+          python3 build_program_schedule_workbook_jsons.py \
+            "주간프로그램 계획표(2026).xlsx" \
+            --output-dir data/generated
+
       - name: Build webapp bundle
         working-directory: bandi_program
         run: |
           python3 build_program_schedule_bundle.py \
-            data/generated/program_schedule_week*.json \
+            "data/generated/program_schedule_week*.json" \
             --output webapp/assets/program_schedule.json
 
       - name: Write webapp version

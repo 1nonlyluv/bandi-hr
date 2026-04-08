@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import glob
 import json
 from pathlib import Path
 
@@ -78,13 +79,31 @@ def build_bundle(paths: list[str]) -> dict:
     return base
 
 
+def expand_json_inputs(patterns: list[str]) -> list[str]:
+    expanded: list[str] = []
+    for pattern in patterns:
+        matches = sorted(glob.glob(pattern))
+        if matches:
+            expanded.extend(matches)
+        else:
+            expanded.append(pattern)
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for path in expanded:
+        if path in seen:
+            continue
+        deduped.append(path)
+        seen.add(path)
+    return deduped
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Merge weekly program JSON payloads into one bundle.")
     parser.add_argument("json_paths", nargs="+", help="Input weekly JSON files.")
     parser.add_argument("--output", default="webapp/assets/program_schedule.json", help="Output bundle path.")
     args = parser.parse_args()
 
-    bundle = build_bundle(args.json_paths)
+    bundle = build_bundle(expand_json_inputs(args.json_paths))
     output_path = Path(args.output).resolve()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(bundle, ensure_ascii=False, indent=2), encoding="utf-8")
