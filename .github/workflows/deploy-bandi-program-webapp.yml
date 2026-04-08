@@ -12,6 +12,7 @@ name: Deploy Bandi Program Webapp
       - "bandi_program/build_program_schedule_workbook_jsons.py"
       - "bandi_program/build_program_schedule_bundle.py"
       - "bandi_program/program_schedule_parser.py"
+      - "bandi_program/shuttle_schedule_parser.py"
       - "bandi_program/program_schedule_normalizer.py"
       - "bandi_program/write_webapp_version.py"
       - ".github/workflows/deploy-bandi-program-webapp.yml"
