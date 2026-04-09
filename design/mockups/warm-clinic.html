@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Warm Clinic Mockup</title>
+    <style>
+      :root {
+        --bg: #f5efe4;
+        --bg-strong: #fffaf1;
+        --ink: #24304b;
+        --soft: #6d7689;
+        --line: rgba(36, 48, 75, 0.1);
+        --accent: #ef7a3c;
+        --accent-soft: #ffe0cc;
+        --green: #9ebf57;
+        --green-soft: #e7f0d1;
+        --shadow: 0 24px 60px rgba(36, 48, 75, 0.12);
+        --radius: 28px;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "SUIT", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(239, 122, 60, 0.18), transparent 24%),
+          radial-gradient(circle at top right, rgba(158, 191, 87, 0.18), transparent 26%),
+          linear-gradient(180deg, #fcf8f1, var(--bg));
+      }
+      .shell {
+        width: 1440px;
+        min-height: 1800px;
+        margin: 0 auto;
+        padding: 48px 56px 72px;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 48px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        font-size: 30px;
+        font-weight: 800;
+      }
+      .brand img { width: 74px; height: 74px; object-fit: contain; }
+      .nav {
+        padding: 16px 24px;
+        border-radius: 999px;
+        background: rgba(255, 250, 241, 0.9);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+        color: var(--ink);
+        font-weight: 700;
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+      .year {
+        font-family: "Avenir Next", "Noto Serif KR", serif;
+        font-size: 42px;
+        color: var(--soft);
+      }
+      .date-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        margin-top: 10px;
+      }
+      .arrow {
+        width: 66px;
+        height: 66px;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.82);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+        font-size: 34px;
+      }
+      .date {
+        font-family: "Avenir Next", "Noto Serif KR", serif;
+        font-size: 84px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: 1.15fr 1.15fr;
+        gap: 24px;
+      }
+      .card {
+        min-height: 260px;
+        padding: 28px 30px;
+        border-radius: var(--radius);
+        border: 1px solid var(--line);
+        background: rgba(255, 251, 245, 0.88);
+        box-shadow: var(--shadow);
+      }
+      .card.work {
+        background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,248,238,0.94));
+      }
+      .card.off {
+        background: linear-gradient(180deg, rgba(255, 233, 222, 0.9), rgba(255, 247, 242, 0.96));
+      }
+      .card.kitchen {
+        background: linear-gradient(180deg, rgba(232, 241, 209, 0.86), rgba(255, 252, 245, 0.96));
+      }
+      .label { font-size: 24px; color: var(--soft); margin-bottom: 18px; }
+      .value {
+        font-family: "Avenir Next", "Noto Serif KR", serif;
+        font-size: 76px;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 16px;
+      }
+      .sub { font-size: 24px; color: var(--soft); }
+      .note {
+        font-size: 42px;
+        line-height: 1.35;
+        font-weight: 800;
+      }
+      .calendar-preview {
+        margin-top: 34px;
+        padding: 30px;
+        border-radius: 36px;
+        border: 1px solid var(--line);
+        background: rgba(255, 251, 245, 0.86);
+        box-shadow: var(--shadow);
+      }
+      .calendar-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+      }
+      .calendar-head h2 {
+        margin: 0;
+        font-family: "Avenir Next", "Noto Serif KR", serif;
+        font-size: 42px;
+      }
+      .month-pill {
+        padding: 14px 22px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid var(--line);
+        font-weight: 700;
+      }
+      .calendar-body {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 22px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 12px;
+      }
+      .day {
+        min-height: 160px;
+        padding: 14px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.88);
+        border: 1px solid var(--line);
+      }
+      .day.selected {
+        background: linear-gradient(180deg, rgba(255, 235, 222, 0.95), rgba(255,255,255,0.96));
+        border-color: rgba(239, 122, 60, 0.35);
+      }
+      .day.sunday {
+        background: rgba(108, 118, 137, 0.08);
+      }
+      .day-num {
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 12px;
+      }
+      .day-line {
+        font-size: 15px;
+        color: var(--soft);
+        margin-bottom: 8px;
+      }
+      .side {
+        padding: 22px;
+        border-radius: 26px;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid var(--line);
+      }
+      .side h3 {
+        margin: 6px 0 16px;
+        font-family: "Avenir Next", "Noto Serif KR", serif;
+        font-size: 34px;
+      }
+      .chips {
+        display: flex;
+        gap: 10px;
+        margin: 18px 0;
+      }
+      .chip {
+        padding: 10px 16px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: transparent;
+        font-weight: 700;
+      }
+      .chip.active {
+        background: var(--ink);
+        color: white;
+      }
+      .panel-note {
+        padding: 16px;
+        border-radius: 18px;
+        background: var(--accent-soft);
+        font-size: 18px;
+        line-height: 1.5;
+      }
+      .list {
+        margin-top: 18px;
+        border-top: 1px solid var(--line);
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 10px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--line);
+        font-size: 17px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="header">
+        <div class="brand">
+          <img src="../../반디로고.png" alt="반디 로고" />
+          <span>반디근무</span>
+        </div>
+        <div class="nav">월간 캘린더</div>
+      </header>
+
+      <section class="hero">
+        <div class="year">2026</div>
+        <div class="date-row">
+          <div class="arrow">←</div>
+          <div class="date">3월 16일 월요일</div>
+          <div class="arrow">→</div>
+        </div>
+      </section>
+
+      <section class="cards">
+        <article class="card work">
+          <div class="label">근무자</div>
+          <div class="value">17</div>
+          <div class="sub">상세 보기</div>
+        </article>
+        <article class="card off">
+          <div class="label">휴무자</div>
+          <div class="value">2</div>
+          <div class="sub">상세 보기</div>
+        </article>
+        <article class="card kitchen">
+          <div class="label">금주의 주방 담당 반</div>
+          <div class="value">사랑반</div>
+          <div class="sub">주간 순환 담당</div>
+        </article>
+        <article class="card off">
+          <div class="label">비고</div>
+          <div class="note">직원회의 오후 6시</div>
+        </article>
+      </section>
+
+      <section class="calendar-preview">
+        <div class="calendar-head">
+          <h2>월간 캘린더</h2>
+          <div class="month-pill">2026년 3월</div>
+        </div>
+        <div class="calendar-body">
+          <div class="grid">
+            <div class="day sunday"><div class="day-num">1 일</div><div class="day-line">센터 휴무</div><div class="day-line">삼일절</div></div>
+            <div class="day selected"><div class="day-num">2 월</div><div class="day-line">근무 11</div><div class="day-line">휴무 8</div><div class="day-line">대체 공휴일</div></div>
+            <div class="day"><div class="day-num">3 화</div><div class="day-line">근무 19</div><div class="day-line">휴무 0</div><div class="day-line">직원회의</div></div>
+            <div class="day"><div class="day-num">4 수</div><div class="day-line">근무 15.5</div><div class="day-line">휴무 3</div><div class="day-line">&nbsp;</div></div>
+            <div class="day"><div class="day-num">5 목</div><div class="day-line">근무 15</div><div class="day-line">휴무 1</div><div class="day-line">&nbsp;</div></div>
+            <div class="day"><div class="day-num">6 금</div><div class="day-line">근무 16</div><div class="day-line">휴무 2</div><div class="day-line">&nbsp;</div></div>
+            <div class="day"><div class="day-num">7 토</div><div class="day-line">근무 7</div><div class="day-line">휴무 12</div><div class="day-line">&nbsp;</div></div>
+          </div>
+          <aside class="side">
+            <div class="label">선택 날짜</div>
+            <h3>2026년 3월 2일</h3>
+            <div class="panel-note">비고: 대체 공휴일</div>
+            <div class="chips">
+              <div class="chip">근무자</div>
+              <div class="chip active">휴무자</div>
+            </div>
+            <div class="list">
+              <div class="row"><strong>이름</strong><strong>직위</strong><strong>소속</strong><strong>휴무 종류</strong></div>
+              <div class="row"><span>김용숙</span><span>요양보호사</span><span>사랑반</span><span>휴무(지정)</span></div>
+              <div class="row"><span>김계순</span><span>조리원</span><span>-</span><span>연차</span></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

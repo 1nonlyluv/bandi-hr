@@ -28,11 +28,15 @@ export type EmployeeDayRecord = {
 export type DaySummary = {
   date: string;
   isSundayClosed: boolean;
+  isHoliday: boolean;
   actualWorkCount: number;
   trainingCount: number;
   offCount: number;
   workDisplayText: string;
   kitchenDutyGroup: string;
+  holidayName: string;
+  remarks: string;
+  workEmployees: EmployeeDayRecord[];
   offEmployees: EmployeeDayRecord[];
   allEmployees: EmployeeDayRecord[];
 };

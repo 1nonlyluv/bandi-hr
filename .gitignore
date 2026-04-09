@@ -15,6 +15,7 @@ dist/
 dist-ssr/
 coverage/
 *.tsbuildinfo
+desktop/build/
 
 # Local environment overrides
 .env

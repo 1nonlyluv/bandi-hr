@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bandi Board Mockup</title>
+    <style>
+      :root {
+        --bg: #fff7ec;
+        --panel: #fffef9;
+        --ink: #1f2840;
+        --soft: #677188;
+        --orange: #ff7a1a;
+        --lime: #9bc700;
+        --yellow: #ffcf41;
+        --line: rgba(31, 40, 64, 0.12);
+        --shadow: 0 28px 70px rgba(31, 40, 64, 0.13);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "SUIT", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+        color: var(--ink);
+        background:
+          linear-gradient(120deg, rgba(255,122,26,0.08), transparent 38%),
+          linear-gradient(220deg, rgba(155,199,0,0.1), transparent 32%),
+          linear-gradient(180deg, #fffaf1, var(--bg));
+      }
+      .shell {
+        width: 1440px;
+        min-height: 1800px;
+        margin: 0 auto;
+        padding: 42px 52px 72px;
+      }
+      .top-band {
+        display: grid;
+        grid-template-columns: 1.25fr auto;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 18px;
+        font-size: 32px;
+        font-weight: 900;
+      }
+      .brand img { width: 78px; height: 78px; object-fit: contain; }
+      .calendar-link {
+        padding: 16px 24px;
+        border-radius: 999px;
+        background: white;
+        border: 2px solid rgba(31, 40, 64, 0.08);
+        box-shadow: var(--shadow);
+        font-weight: 800;
+      }
+      .hero {
+        padding: 32px 36px;
+        border-radius: 38px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,248,237,0.96));
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+      }
+      .hero-top {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 24px;
+        align-items: center;
+      }
+      .year {
+        font-size: 38px;
+        font-weight: 800;
+        color: var(--soft);
+        justify-self: center;
+      }
+      .date {
+        text-align: center;
+        font-size: 88px;
+        font-weight: 900;
+        letter-spacing: -0.05em;
+      }
+      .arrow {
+        width: 72px;
+        height: 72px;
+        display: grid;
+        place-items: center;
+        border-radius: 22px;
+        background: white;
+        border: 1px solid var(--line);
+        font-size: 34px;
+        box-shadow: var(--shadow);
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: 1.2fr 1.2fr;
+        gap: 24px;
+        margin-top: 28px;
+      }
+      .card {
+        min-height: 260px;
+        border-radius: 34px;
+        padding: 30px;
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+        background: white;
+      }
+      .card.hot {
+        background: linear-gradient(180deg, rgba(255, 240, 229, 0.98), rgba(255,255,255,0.95));
+      }
+      .card.green {
+        background: linear-gradient(180deg, rgba(242, 250, 221, 0.95), rgba(255,255,255,0.95));
+      }
+      .label { color: var(--soft); font-size: 24px; margin-bottom: 12px; }
+      .value {
+        font-size: 86px;
+        font-weight: 900;
+        line-height: 1;
+        margin-bottom: 14px;
+      }
+      .small {
+        font-size: 24px;
+        color: var(--soft);
+      }
+      .note {
+        font-size: 40px;
+        font-weight: 900;
+        line-height: 1.35;
+      }
+      .calendar {
+        margin-top: 30px;
+        padding: 26px;
+        border-radius: 40px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.88);
+        box-shadow: var(--shadow);
+      }
+      .cal-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+      }
+      .cal-head h2 {
+        margin: 0;
+        font-size: 44px;
+        font-weight: 900;
+      }
+      .selector {
+        padding: 14px 20px;
+        border-radius: 18px;
+        background: #fffaf4;
+        border: 1px solid var(--line);
+        font-weight: 800;
+      }
+      .body {
+        display: grid;
+        grid-template-columns: 1.8fr 1fr;
+        gap: 22px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 14px;
+      }
+      .day {
+        min-height: 150px;
+        padding: 14px;
+        border-radius: 24px;
+        background: #fffef9;
+        border: 1px solid rgba(31,40,64,0.08);
+      }
+      .day.marked {
+        background: linear-gradient(180deg, rgba(255, 235, 220, 0.95), rgba(255,255,255,0.95));
+        border-color: rgba(255, 122, 26, 0.28);
+      }
+      .day.holiday {
+        box-shadow: inset 0 0 0 2px rgba(255, 122, 26, 0.12);
+      }
+      .daynum { font-size: 22px; font-weight: 900; margin-bottom: 10px; }
+      .meta { font-size: 14px; color: var(--soft); margin-bottom: 7px; }
+      .badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(255, 122, 26, 0.12);
+        color: var(--orange);
+        font-weight: 800;
+        margin-top: 8px;
+      }
+      .side {
+        padding: 24px;
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,248,238,0.96));
+        border: 1px solid var(--line);
+      }
+      .side h3 { margin: 8px 0 12px; font-size: 36px; }
+      .memo {
+        padding: 16px 18px;
+        border-radius: 22px;
+        background: rgba(255, 245, 212, 0.9);
+        border: 1px solid rgba(255, 207, 65, 0.4);
+        font-size: 18px;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin: 18px 0;
+      }
+      .tab {
+        padding: 12px 18px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        font-weight: 900;
+      }
+      .tab.active {
+        background: var(--ink);
+        color: white;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 8px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <div class="top-band">
+        <div class="brand">
+          <img src="../../반디로고.png" alt="반디 로고" />
+          <span>반디근무</span>
+        </div>
+        <div class="calendar-link">월간 캘린더</div>
+      </div>
+
+      <section class="hero">
+        <div class="year">2026</div>
+        <div class="hero-top">
+          <div class="arrow">←</div>
+          <div class="date">3월 16일 월요일</div>
+          <div class="arrow">→</div>
+        </div>
+        <div class="cards">
+          <article class="card">
+            <div class="label">근무자</div>
+            <div class="value">17</div>
+            <div class="small">상세 보기</div>
+          </article>
+          <article class="card hot">
+            <div class="label">휴무자</div>
+            <div class="value">2</div>
+            <div class="small">상세 보기</div>
+          </article>
+          <article class="card green">
+            <div class="label">금주의 주방 담당 반</div>
+            <div class="value">사랑반</div>
+            <div class="small">이번 주 담당</div>
+          </article>
+          <article class="card hot">
+            <div class="label">비고</div>
+            <div class="note">상반기 회식 오후 6시 30분</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="calendar">
+        <div class="cal-head">
+          <h2>월간 캘린더</h2>
+          <div class="selector">2026년 3월</div>
+        </div>
+        <div class="body">
+          <div class="grid">
+            <div class="day holiday"><div class="daynum">1 일</div><div class="meta">센터 휴무</div><span class="badge">삼일절</span></div>
+            <div class="day marked holiday"><div class="daynum">2 월</div><div class="meta">근무 11</div><div class="meta">휴무 8</div><span class="badge">대체 공휴일</span></div>
+            <div class="day marked"><div class="daynum">3 화</div><div class="meta">근무 19</div><div class="meta">휴무 0</div><span class="badge">직원회의</span></div>
+            <div class="day"><div class="daynum">4 수</div><div class="meta">근무 15.5</div><div class="meta">휴무 3</div></div>
+            <div class="day"><div class="daynum">5 목</div><div class="meta">근무 15</div><div class="meta">휴무 1</div></div>
+            <div class="day"><div class="daynum">6 금</div><div class="meta">근무 16</div><div class="meta">휴무 2</div></div>
+            <div class="day"><div class="daynum">7 토</div><div class="meta">근무 7</div><div class="meta">휴무 12</div></div>
+          </div>
+          <aside class="side">
+            <div class="label">선택 날짜</div>
+            <h3>3월 2일 월요일</h3>
+            <div class="memo">비고: 대체 공휴일</div>
+            <div class="tabs">
+              <div class="tab">근무자</div>
+              <div class="tab active">휴무자</div>
+            </div>
+            <div class="row"><strong>이름</strong><strong>직위</strong><strong>소속</strong><strong>휴무 종류</strong></div>
+            <div class="row"><span>김용숙</span><span>요양보호사</span><span>사랑반</span><span>휴무</span></div>
+            <div class="row"><span>김계순</span><span>조리원</span><span>-</span><span>연차</span></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

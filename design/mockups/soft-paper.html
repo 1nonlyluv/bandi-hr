@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Soft Paper Mockup</title>
+    <style>
+      :root {
+        --paper: #f4efe7;
+        --panel: #fffdf8;
+        --ink: #283247;
+        --soft: #697282;
+        --line: rgba(40, 50, 71, 0.14);
+        --orange: #de6e3f;
+        --green: #8da55c;
+        --shadow: 0 16px 38px rgba(40, 50, 71, 0.08);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Iowan Old Style", "Noto Serif KR", serif;
+        color: var(--ink);
+        background:
+          linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72)),
+          repeating-linear-gradient(0deg, rgba(40,50,71,0.03), rgba(40,50,71,0.03) 1px, transparent 1px, transparent 34px),
+          linear-gradient(180deg, #f8f4ed, var(--paper));
+      }
+      .shell {
+        width: 1440px;
+        min-height: 1800px;
+        margin: 0 auto;
+        padding: 54px 60px 84px;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 48px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        font-size: 34px;
+        font-weight: 700;
+      }
+      .brand img { width: 72px; height: 72px; object-fit: contain; }
+      .pill {
+        padding: 14px 20px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.74);
+        box-shadow: var(--shadow);
+        font-family: "SUIT", sans-serif;
+        font-weight: 700;
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 34px;
+      }
+      .year {
+        font-size: 38px;
+        color: var(--soft);
+        margin-bottom: 6px;
+      }
+      .date-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+      }
+      .arrow {
+        width: 58px;
+        height: 58px;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.72);
+        font-size: 28px;
+      }
+      .date {
+        font-size: 82px;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 28px;
+      }
+      .card {
+        min-height: 250px;
+        padding: 26px;
+        border-radius: 24px;
+        background: rgba(255, 253, 248, 0.86);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+      }
+      .card.work { border-top: 4px solid var(--green); }
+      .card.off { border-top: 4px solid var(--orange); }
+      .label {
+        font-size: 22px;
+        color: var(--soft);
+        margin-bottom: 12px;
+        font-family: "SUIT", sans-serif;
+      }
+      .value {
+        font-size: 68px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+      .meta {
+        font-size: 21px;
+        color: var(--soft);
+        font-family: "SUIT", sans-serif;
+      }
+      .note {
+        font-size: 34px;
+        line-height: 1.45;
+      }
+      .sheet {
+        border-radius: 28px;
+        background: rgba(255,255,255,0.78);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .sheet-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 22px 28px;
+        border-bottom: 1px solid var(--line);
+      }
+      .sheet-head h2 {
+        margin: 0;
+        font-size: 40px;
+      }
+      .sheet-body {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+      }
+      .month {
+        padding: 22px;
+        border-right: 1px solid var(--line);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+      }
+      .day {
+        min-height: 148px;
+        padding: 12px;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.7);
+        border: 1px solid rgba(40,50,71,0.1);
+      }
+      .day.selected {
+        background: rgba(222, 110, 63, 0.08);
+      }
+      .day.sunday {
+        background: rgba(40,50,71,0.05);
+      }
+      .daynum {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .line {
+        font-size: 14px;
+        color: var(--soft);
+        margin-bottom: 7px;
+        font-family: "SUIT", sans-serif;
+      }
+      .detail {
+        padding: 24px;
+      }
+      .detail h3 {
+        margin: 6px 0 16px;
+        font-size: 34px;
+      }
+      .memo {
+        padding: 16px;
+        border-left: 4px solid var(--orange);
+        background: rgba(255, 248, 241, 0.92);
+        margin-bottom: 18px;
+        font-family: "SUIT", sans-serif;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .tab {
+        padding: 11px 15px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        font-family: "SUIT", sans-serif;
+      }
+      .tab.active {
+        background: var(--ink);
+        color: white;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: "SUIT", sans-serif;
+      }
+      th, td {
+        padding: 12px 8px;
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+      }
+      th { color: var(--soft); font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="header">
+        <div class="brand">
+          <img src="../../반디로고.png" alt="반디 로고" />
+          <span>반디근무</span>
+        </div>
+        <div class="pill">월간 캘린더</div>
+      </header>
+
+      <section class="hero">
+        <div class="year">2026</div>
+        <div class="date-wrap">
+          <div class="arrow">←</div>
+          <div class="date">3월 16일 월요일</div>
+          <div class="arrow">→</div>
+        </div>
+      </section>
+
+      <section class="cards">
+        <article class="card work">
+          <div class="label">근무자</div>
+          <div class="value">17</div>
+          <div class="meta">상세 보기</div>
+        </article>
+        <article class="card off">
+          <div class="label">휴무자</div>
+          <div class="value">2</div>
+          <div class="meta">상세 보기</div>
+        </article>
+        <article class="card work">
+          <div class="label">금주의 주방 담당 반</div>
+          <div class="value">사랑반</div>
+          <div class="meta">주간 순환 담당</div>
+        </article>
+        <article class="card off">
+          <div class="label">비고</div>
+          <div class="note">직원회의 오후 6시</div>
+        </article>
+      </section>
+
+      <section class="sheet">
+        <div class="sheet-head">
+          <h2>월간 캘린더</h2>
+          <div class="pill">2026년 3월</div>
+        </div>
+        <div class="sheet-body">
+          <div class="month">
+            <div class="grid">
+              <div class="day sunday"><div class="daynum">1 일</div><div class="line">센터 휴무</div><div class="line">삼일절</div></div>
+              <div class="day selected"><div class="daynum">2 월</div><div class="line">근무 11</div><div class="line">휴무 8</div><div class="line">대체 공휴일</div></div>
+              <div class="day"><div class="daynum">3 화</div><div class="line">근무 19</div><div class="line">휴무 0</div><div class="line">직원회의</div></div>
+              <div class="day"><div class="daynum">4 수</div><div class="line">근무 15.5</div><div class="line">휴무 3</div></div>
+              <div class="day"><div class="daynum">5 목</div><div class="line">근무 15</div><div class="line">휴무 1</div></div>
+              <div class="day"><div class="daynum">6 금</div><div class="line">근무 16</div><div class="line">휴무 2</div></div>
+              <div class="day"><div class="daynum">7 토</div><div class="line">근무 7</div><div class="line">휴무 12</div></div>
+            </div>
+          </div>
+          <aside class="detail">
+            <div class="label">선택 날짜</div>
+            <h3>2026년 3월 2일</h3>
+            <div class="memo">비고: 대체 공휴일</div>
+            <div class="tabs">
+              <div class="tab">근무자</div>
+              <div class="tab active">휴무자</div>
+            </div>
+            <table>
+              <thead>
+                <tr><th>이름</th><th>직위</th><th>소속</th><th>휴무 종류</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>김용숙</td><td>요양보호사</td><td>사랑반</td><td>휴무</td></tr>
+                <tr><td>김계순</td><td>조리원</td><td>-</td><td>연차</td></tr>
+              </tbody>
+            </table>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

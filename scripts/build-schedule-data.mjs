@@ -1,9 +1,13 @@
-import ExcelJS from "exceljs";
+import Workbook from "exceljs/lib/doc/workbook.js";
 import fs from "node:fs/promises";
 import path from "node:path";
 
 const EMPLOYEE_START = 6;
 const EMPLOYEE_END = 25;
+const DATE_COLUMN_START = 7;
+const DATE_COLUMN_END = 37;
+const HOLIDAY_API_URL = "https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo";
+const HOLIDAY_ENV_KEY = "DATA_GO_KR_SERVICE_KEY";
 const WANTED_OFF_FILL = "FFDAEEF3";
 const MEETING_OVERRIDE_DATE = "2026-03-03";
 const GROUP_RULES = [
@@ -13,6 +17,32 @@ const GROUP_RULES = [
 ];
 const KITCHEN_GROUPS = ["소망반", "믿음반", "사랑반"];
 const KITCHEN_ANCHOR = new Date("2026-03-01T00:00:00+09:00");
+const KITCHEN_TEACHER_NAME = "김계순";
+const KITCHEN_TEACHER_OFF_REMARK = "주방 선생님 휴무";
+const REMARK_LEGEND_VALUES = new Set([
+  "근무",
+  "휴무",
+  "연차",
+  "주방담당반",
+  "원하는 휴무",
+  "오전반차",
+  "오후반차",
+  "오전연차반차",
+  "오후연차반차",
+  "오전반차 08:00~12:30",
+  "오후반차 12:30~17:00",
+  "오전연차반차 08:00~12:30",
+  "오후연차반차 12:30~17:00",
+  "휴무(지정)",
+  "휴무(신청)",
+  "▲",
+  "●",
+  "D●",
+  "●D",
+  "D▲",
+  "▲D",
+  "D",
+]);
 
 function toIsoDate(date) {
   const year = date.getFullYear();
@@ -66,9 +96,18 @@ function isSunday(date) {
   return date.getDay() === 0;
 }
 
+function isWeekday(date) {
+  const day = date.getDay();
+  return day >= 1 && day <= 5;
+}
+
 function cellText(worksheet, ref) {
-  const value = worksheet.getCell(ref).text?.trim();
-  return value || "";
+  try {
+    const value = worksheet.getCell(ref).text?.trim();
+    return value || "";
+  } catch {
+    return "";
+  }
 }
 
 function cellFill(worksheet, ref) {
@@ -122,25 +161,169 @@ function validateTemplate(worksheet) {
   return ["B1", "G4", "G5", "C6", "E6"].every((ref) => cellText(worksheet, ref));
 }
 
+function normalizeWhitespace(value) {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function isRemarkCandidate(value) {
+  const normalized = normalizeWhitespace(value);
+  if (!normalized) return false;
+  if (!/[가-힣A-Za-z0-9]/.test(normalized)) return false;
+  if (REMARK_LEGEND_VALUES.has(normalized)) return false;
+  if (/^[\d.]+$/.test(normalized)) return false;
+  return true;
+}
+
+function findRemarksRow(worksheet, columns) {
+  let bestRow = null;
+  let bestScore = 0;
+
+  for (let row = EMPLOYEE_END + 1; row <= worksheet.actualRowCount; row += 1) {
+    let score = 0;
+    for (const column of columns) {
+      if (isRemarkCandidate(cellText(worksheet, `${column}${row}`))) {
+        score += 1;
+      }
+    }
+    if (score > 0 && (score > bestScore || (score === bestScore && (bestRow === null || row > bestRow)))) {
+      bestRow = row;
+      bestScore = score;
+    }
+  }
+
+  return bestRow;
+}
+
+function decodeXml(value) {
+  return value
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", "\"")
+    .replaceAll("&apos;", "'")
+    .replaceAll("&amp;", "&");
+}
+
+function extractXmlValue(block, tagName) {
+  const match = block.match(new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`));
+  return match ? decodeXml(match[1].trim()) : "";
+}
+
+function mergeRemarkParts(parts) {
+  const unique = [];
+  for (const part of parts.map((value) => normalizeWhitespace(value)).filter(Boolean)) {
+    if (!unique.includes(part)) {
+      unique.push(part);
+    }
+  }
+  return unique.join(" · ");
+}
+
+function isKnownHolidayText(value) {
+  if (!value) return false;
+  return /(공휴일|삼일절|현충일|광복절|개천절|한글날|어린이날|설날|추석|성탄절|부처님 오신 날)/.test(value);
+}
+
+async function loadEnvFiles(cwd) {
+  const envFiles = [".env.local", ".env"];
+  for (const fileName of envFiles) {
+    const envPath = path.join(cwd, fileName);
+    try {
+      const contents = await fs.readFile(envPath, "utf8");
+      for (const line of contents.split(/\r?\n/)) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+        const index = trimmed.indexOf("=");
+        if (index === -1) continue;
+        const key = trimmed.slice(0, index).trim();
+        if (!key || process.env[key]) continue;
+        let value = trimmed.slice(index + 1).trim();
+        if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
+          value = value.slice(1, -1);
+        }
+        process.env[key] = value;
+      }
+    } catch (error) {
+      if (error?.code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
+}
+
 async function findWorkbookFile(cwd) {
-  const entries = await fs.readdir(cwd);
-  const workbook = entries.filter((entry) => entry.endsWith(".xlsx")).sort()[0];
+  const entries = await fs.readdir(cwd, { withFileTypes: true });
+  const workbooks = [];
+
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith(".xlsx")) continue;
+    const stats = await fs.stat(path.join(cwd, entry.name));
+    workbooks.push({ name: entry.name, modifiedAt: stats.mtimeMs });
+  }
+
+  workbooks.sort((left, right) => right.modifiedAt - left.modifiedAt);
+  const workbook = workbooks[0]?.name;
   if (!workbook) {
     throw new Error("No .xlsx workbook found in project root");
   }
   return workbook;
 }
 
+async function fetchHolidayMap(monthKeys) {
+  const serviceKey = process.env[HOLIDAY_ENV_KEY];
+  if (!serviceKey) {
+    return new Map();
+  }
+
+  const holidayMap = new Map();
+  const uniqueMonths = [...new Set(monthKeys)].sort();
+
+  for (const monthKey of uniqueMonths) {
+    const [year, month] = monthKey.split("-");
+    const searchParams = new URLSearchParams({
+      ServiceKey: serviceKey,
+      pageNo: "1",
+      numOfRows: "50",
+      solYear: year,
+      solMonth: month,
+    });
+
+    try {
+      const response = await fetch(`${HOLIDAY_API_URL}?${searchParams.toString()}`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      const xml = await response.text();
+      for (const match of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
+        const block = match[1];
+        const locdate = extractXmlValue(block, "locdate");
+        const dateName = extractXmlValue(block, "dateName");
+        const isHolidayFlag = extractXmlValue(block, "isHoliday");
+        if (!locdate || isHolidayFlag !== "Y") continue;
+        const dateIso = `${locdate.slice(0, 4)}-${locdate.slice(4, 6)}-${locdate.slice(6, 8)}`;
+        holidayMap.set(dateIso, dateName);
+      }
+    } catch (error) {
+      console.warn(`Holiday API lookup failed for ${monthKey}; continuing without API holidays.`);
+      console.warn(error instanceof Error ? error.message : error);
+      return holidayMap;
+    }
+  }
+
+  return holidayMap;
+}
+
 async function build() {
   const cwd = process.cwd();
+  await loadEnvFiles(cwd);
+
   const workbookName = process.argv[2] ?? (await findWorkbookFile(cwd));
   const workbookPath = path.resolve(cwd, workbookName);
+  const workbookStats = await fs.stat(workbookPath);
 
-  const workbook = new ExcelJS.Workbook();
+  const workbook = new Workbook();
   await workbook.xlsx.readFile(workbookPath);
 
   const monthsByKey = new Map();
-  const columns = columnsBetween(7, 37);
+  const columns = columnsBetween(DATE_COLUMN_START, DATE_COLUMN_END);
 
   workbook.worksheets.forEach((worksheet) => {
     const monthKey = monthKeyFromSheet(worksheet.name);
@@ -148,16 +331,19 @@ async function build() {
     monthsByKey.set(monthKey, worksheet);
   });
 
+  const monthKeys = [...monthsByKey.keys()].sort();
+  const holidayMap = await fetchHolidayMap(monthKeys);
   const months = [];
   const days = [];
 
-  for (const monthKey of [...monthsByKey.keys()].sort()) {
+  for (const monthKey of monthKeys) {
     const worksheet = monthsByKey.get(monthKey);
     if (!worksheet || !validateTemplate(worksheet)) {
       console.warn(`Skipping ${worksheet?.name ?? monthKey}: template cells not found`);
       continue;
     }
 
+    const remarksRow = findRemarksRow(worksheet, columns);
     const [year, month] = monthKey.split("-").map(Number);
     const employees = [];
 
@@ -186,17 +372,24 @@ async function build() {
       }
 
       const dateIso = toIsoDate(date);
+      const holidayName = holidayMap.get(dateIso) ?? "";
+      const manualRemark = remarksRow ? normalizeWhitespace(cellText(worksheet, `${column}${remarksRow}`)) : "";
+      const isHoliday = Boolean(holidayName || isKnownHolidayText(manualRemark));
       monthDates.push(dateIso);
 
       if (isSunday(date)) {
         days.push({
           date: dateIso,
           isSundayClosed: true,
+          isHoliday,
           actualWorkCount: 0,
           trainingCount: 0,
           offCount: 0,
           workDisplayText: "-",
-          kitchenDutyGroup: kitchenDutyGroup(date),
+          kitchenDutyGroup: "",
+          holidayName,
+          remarks: mergeRemarkParts([manualRemark, holidayName]),
+          workEmployees: [],
           offEmployees: [],
           allEmployees: [],
         });
@@ -220,19 +413,27 @@ async function build() {
         };
       });
 
+      const workEmployees = records.filter((row) => row.workWeight > 0 || row.trainingWeight > 0);
+      const offEmployees = records.filter((row) => row.offWeight > 0);
       const actualWorkCount = normalizeWeight(records.reduce((sum, row) => sum + row.workWeight, 0));
       const trainingCount = normalizeWeight(records.reduce((sum, row) => sum + row.trainingWeight, 0));
       const offCount = normalizeWeight(records.reduce((sum, row) => sum + row.offWeight, 0));
+      const kitchenTeacherOff = isWeekday(date) && offEmployees.some((row) => row.name === KITCHEN_TEACHER_NAME);
+      const remarks = mergeRemarkParts([manualRemark, holidayName, kitchenTeacherOff ? KITCHEN_TEACHER_OFF_REMARK : ""]);
 
       days.push({
         date: dateIso,
         isSundayClosed: false,
+        isHoliday,
         actualWorkCount,
         trainingCount,
         offCount,
         workDisplayText: trainingCount > 0 ? `${formatWeight(actualWorkCount)} (+ 교육 ${formatWeight(trainingCount)})` : formatWeight(actualWorkCount),
         kitchenDutyGroup: kitchenDutyGroup(date),
-        offEmployees: records.filter((row) => row.offWeight > 0),
+        holidayName,
+        remarks,
+        workEmployees,
+        offEmployees,
         allEmployees: records,
       });
     }
@@ -248,7 +449,7 @@ async function build() {
   months.sort((left, right) => left.key.localeCompare(right.key));
 
   const payload = {
-    generatedAt: new Date().toISOString(),
+    generatedAt: workbookStats.mtime.toISOString(),
     sourceFile: path.basename(workbookPath),
     months,
     days,

@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>반디 프로그램 뷰어 Now 프로토타입</title>
+  <style>
+    :root {
+      --bg: #f0e6d8;
+      --paper: rgba(252, 248, 242, 0.92);
+      --paper-strong: rgba(255, 252, 248, 0.96);
+      --ink: #2d3138;
+      --ink-soft: #6c7179;
+      --line: rgba(45, 49, 56, 0.1);
+      --accent: #bf6e43;
+      --accent-soft: rgba(191, 110, 67, 0.12);
+      --success: #3d8f6e;
+      --shadow: 0 24px 48px rgba(98, 78, 56, 0.14);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --font-display: "Avenir Next", "Apple SD Gothic Neo", sans-serif;
+      --font-body: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.44), transparent 26%),
+        linear-gradient(180deg, #eadfce 0%, #f6efe5 46%, #ecdfcf 100%);
+    }
+
+    .page {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 28px 18px 40px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .shell {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 22px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-family: var(--font-display);
+      font-weight: 750;
+      font-size: 1.2rem;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #c97c52, #e2b37d);
+      color: white;
+      font-weight: 800;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-chip, .time-chip {
+      min-height: 38px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.7);
+      display: inline-flex;
+      align-items: center;
+      font-weight: 700;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr 0.9fr;
+      gap: 18px;
+    }
+
+    .hero-main, .hero-side, .grid-card {
+      padding: 22px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--ink-soft);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(2.1rem, 5vw, 4.8rem);
+      line-height: 0.92;
+      letter-spacing: -0.05em;
+    }
+
+    .date-copy {
+      margin: 10px 0 0;
+      color: var(--ink-soft);
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .badge {
+      min-height: 38px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: rgba(61, 143, 110, 0.12);
+      color: var(--success);
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .block-hero {
+      margin-top: 22px;
+      padding: 18px 20px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(191, 110, 67, 0.16), rgba(233, 203, 171, 0.28));
+      border: 1px solid rgba(191, 110, 67, 0.18);
+      display: grid;
+      gap: 10px;
+    }
+
+    .block-time {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(1.7rem, 3vw, 2.5rem);
+      letter-spacing: -0.04em;
+    }
+
+    .block-meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--ink-soft);
+      font-weight: 700;
+    }
+
+    .helper-copy {
+      margin: 0;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+
+    .jump-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .jump-card {
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.62);
+      display: grid;
+      gap: 4px;
+    }
+
+    .jump-card small {
+      color: var(--ink-soft);
+      font-weight: 700;
+    }
+
+    .jump-card strong {
+      font-size: 1.02rem;
+    }
+
+    .jump-card span {
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 1.1rem;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 0 22px 22px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+    }
+
+    .entry-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .entry-card {
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: var(--paper-strong);
+      display: grid;
+      gap: 10px;
+    }
+
+    .entry-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .entry-top h3 {
+      margin: 0;
+      font-size: 1.12rem;
+    }
+
+    .entry-top p {
+      margin: 4px 0 0;
+      color: var(--ink-soft);
+    }
+
+    .pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      min-height: 30px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(45, 49, 56, 0.06);
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .entry-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .timeline-item {
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.62);
+      display: grid;
+      gap: 4px;
+    }
+
+    .timeline-item.active {
+      border-color: rgba(191, 110, 67, 0.28);
+      background: rgba(255, 244, 235, 0.96);
+      box-shadow: inset 0 0 0 1px rgba(191, 110, 67, 0.12);
+    }
+
+    .timeline-item strong {
+      font-size: 0.96rem;
+    }
+
+    .timeline-item span {
+      color: var(--ink-soft);
+      font-size: 0.88rem;
+    }
+
+    .demo-bar {
+      padding: 0 22px 22px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .demo-label {
+      color: var(--ink-soft);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .empty {
+      color: var(--ink-soft);
+      padding: 8px 0 2px;
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .status-row {
+        flex-direction: column;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="shell header">
+      <div class="brand">
+        <div class="brand-mark">B</div>
+        <div>반디 프로그램 뷰어</div>
+      </div>
+      <nav class="header-nav">
+        <a class="nav-chip" href="#now">Now</a>
+        <a class="nav-chip" href="#today">오늘</a>
+        <a class="nav-chip" href="#browse">검색</a>
+        <a class="nav-chip" href="#week">주간</a>
+      </nav>
+    </header>
+
+    <section class="hero" id="now">
+      <section class="shell hero-main">
+        <p class="eyebrow">Now</p>
+        <div class="status-row">
+          <div>
+            <h1 class="title" id="clock-title">14:20</h1>
+            <p class="date-copy" id="date-copy">2026년 3월 23일 월요일</p>
+          </div>
+          <div class="badge" id="status-badge">현재 프로그램 진행 중</div>
+        </div>
+
+        <section class="block-hero">
+          <p class="eyebrow">현재 시간 블록</p>
+          <h2 class="block-time" id="block-time">14:00 - 15:00</h2>
+          <div class="block-meta" id="block-meta"></div>
+          <p class="helper-copy" id="status-copy"></p>
+        </section>
+      </section>
+
+      <aside class="shell hero-side">
+        <p class="eyebrow">이전 / 다음</p>
+        <div class="jump-grid">
+          <div class="jump-card">
+            <small>이전 블록</small>
+            <strong id="prev-time">13:40 - 14:00</strong>
+            <span id="prev-copy">오후간식 및 건강체조2</span>
+          </div>
+          <div class="jump-card">
+            <small>다음 블록</small>
+            <strong id="next-time">15:00 - 16:00</strong>
+            <span id="next-copy">종이접기 / 색상패턴 / 연결하기</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="shell">
+      <div class="demo-bar">
+        <span class="demo-label">샘플 시간</span>
+        <a class="time-chip" href="?at=2026-03-23T10:15">10:15</a>
+        <a class="time-chip" href="?at=2026-03-23T10:40">10:40</a>
+        <a class="time-chip" href="?at=2026-03-23T14:20">14:20</a>
+        <a class="time-chip" href="?at=2026-03-23T17:20">17:20</a>
+      </div>
+      <div class="filters" id="today">
+        <span class="time-chip">사랑반</span>
+        <span class="time-chip">믿음반</span>
+        <span class="time-chip">소망반</span>
+        <span class="time-chip">전체</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <section class="shell grid-card">
+        <h2 class="section-title">현재 진행 중인 활동</h2>
+        <div class="entry-list" id="entry-list"></div>
+      </section>
+
+      <aside class="shell grid-card">
+        <h2 class="section-title">오늘 전체 타임라인</h2>
+        <div class="timeline" id="timeline"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script id="program-data" type="application/json">
+    {
+      "meta": {
+        "title": "주간프로그램 계획표",
+        "timezone": "Asia/Seoul",
+        "generatedAt": "2026-03-18T14:00:00+09:00",
+        "defaultView": "now",
+        "sourceLabel": "3월 4주차"
+      },
+      "taxonomies": {
+        "groups": [
+          { "id": "sarang", "label": "사랑반", "color": "#F3B6B0" },
+          { "id": "mideum", "label": "믿음반", "color": "#B9D7A8" },
+          { "id": "somang", "label": "소망반", "color": "#A8D5F2" },
+          { "id": "all", "label": "전체", "color": "#E6D7A8" }
+        ],
+        "categories": [
+          { "id": "service", "label": "서비스" },
+          { "id": "routine", "label": "일상" },
+          { "id": "cognitive", "label": "인지" },
+          { "id": "physical", "label": "신체" },
+          { "id": "rehab", "label": "재활" },
+          { "id": "meal", "label": "식사" }
+        ]
+      },
+      "days": [
+        {
+          "date": "2026-03-23",
+          "weekday": "월",
+          "venueManager": "김은비",
+          "blocks": [
+            {
+              "id": "2026-03-23-1000-service",
+              "start": "10:00",
+              "end": "10:30",
+              "startMin": 600,
+              "endMin": 630,
+              "section": "오전",
+              "entries": [
+                {
+                  "id": "2026-03-23-1000-checkin",
+                  "title": "오전 등원서비스/건강관리",
+                  "subtitle": "혈압, 체온체크",
+                  "categoryId": "service",
+                  "groupIds": ["all"],
+                  "staff": [],
+                  "staffRole": "",
+                  "location": "강당",
+                  "tags": ["등원", "건강관리", "전체"]
+                }
+              ]
+            },
+            {
+              "id": "2026-03-23-1030-program",
+              "start": "10:30",
+              "end": "11:30",
+              "startMin": 630,
+              "endMin": 690,
+              "section": "오전",
+              "entries": [
+                {
+                  "id": "2026-03-23-1030-sarang-rehab",
+                  "title": "재활",
+                  "subtitle": "",
+                  "categoryId": "rehab",
+                  "groupIds": ["sarang"],
+                  "staff": [],
+                  "staffRole": "",
+                  "location": "강당",
+                  "tags": ["재활", "사랑반"]
+                },
+                {
+                  "id": "2026-03-23-1030-mideum-art",
+                  "title": "미술활동",
+                  "subtitle": "목련꽃 필 무렵",
+                  "categoryId": "cognitive",
+                  "groupIds": ["mideum"],
+                  "staff": ["김은비"],
+                  "staffRole": "준비",
+                  "location": "강당",
+                  "tags": ["인지", "믿음반"]
+                },
+                {
+                  "id": "2026-03-23-1030-somang-basketball",
+                  "title": "농구",
+                  "subtitle": "",
+                  "categoryId": "physical",
+                  "groupIds": ["somang"],
+                  "staff": [],
+                  "staffRole": "",
+                  "location": "강당",
+                  "tags": ["신체", "소망반"]
+                }
+              ]
+            },
+            {
+              "id": "2026-03-23-1130-lunch-prep",
+              "start": "11:30",
+              "end": "12:40",
+              "startMin": 690,
+              "endMin": 760,
+              "section": "공통",
+              "entries": [
+                {
+                  "id": "2026-03-23-1130-lunch",
+                  "title": "점심식사 준비",
+                  "subtitle": "식사준비/투약 및 개인위생, 체온체크",
+                  "categoryId": "meal",
+                  "groupIds": ["all"],
+                  "staff": [],
+                  "staffRole": "",
+                  "location": "강당",
+                  "tags": ["식사", "투약", "전체"]
+                }
+              ]
+            },
+            {
+              "id": "2026-03-23-1240-free",
+              "start": "12:40",
+              "end": "13:40",
+              "startMin": 760,
+              "endMin": 820,
+              "section": "공통",
+              "entries": [
+                {
+                  "id": "2026-03-23-1240-self",
+                  "title": "자율시간",
+                  "subtitle": "재활-믿음반 / 강당담당:사랑반",
+                  "categoryId": "routine",
+                  "groupIds": ["all"],
+                  "staff": [],
+                  "staffRole": "",
+                  "location": "강당",
+                  "tags": ["자율시간", "전체"]
+                }
+              ]
+            },
+            {
+              "id": "2026-03-23-1340-snack",
+              "start": "13:40",
+              "end": "14:00",
+              "startMin": 820,
+              "endMin": 840,
+              "section": "오후",
+              "entries": [
+                {
+                  "id": "2026-03-23-1340-routine",
+                  "title": "오후간식 및 건강체조2",
+                  "subtitle": "",
+                  "categoryId": "routine",
+                  "groupIds": ["all"],
+                  "staff": ["강선진"],
+                  "staffRole": "담당",
+                  "location": "강당",
+                  "tags": ["간식", "건강체조", "전체"]
+                }
+              ]
+            },
+            {
+              "id": "2026-03-23-1400-program",
+              "start": "14:00",
+              "end": "15:00",
+              "startMin": 840,
+              "endMin": 900,
+              "section": "오후",
+              "entries": [
+                {
+                  "id": "2026-03-23-1400-sarang-cognitive",
+                  "title": "다른 그림찾기",
+                  "subtitle": "",
+                  "categoryId": "cognitive",
+                  "groupIds": ["sarang"],
+                  "staff": ["김은비"],
+                  "staffRole": "준비",
+                  "location": "강당",
+                  "tags": ["인지", "사랑반"]
+                },
+                {
+                  "id": "2026-03-23-1400-mideum-physical",
+                  "title": "고리던지기",
+                  "subtitle": "",
+                  "categoryId": "physical",
+                  "groupIds": ["mideum"],
+                  "staff": [],
+                  "staffRole": "",
+                  "location": "강당",
+                  "tags": ["신체", "믿음반"]
+                },
+                {
+                  "id": "2026-03-23-1400-somang-rehab",
+                  "title": "재활",
+                  "subtitle": "",
+                  "categoryId": "rehab",
+                  "groupIds": ["somang"],
+                  "staff": [],
+                  "staffRole": "",
+                  "location": "강당",
+                  "tags": ["재활", "소망반"]
+                }
+              ]
+            },
+            {
+              "id": "2026-03-23-1500-program",
+              "start": "15:00",
+              "end": "16:00",
+              "startMin": 900,
+              "endMin": 960,
+              "section": "오후",
+              "entries": [
+                {
+                  "id": "2026-03-23-1500-sarang-origami",
+                  "title": "종이접기",
+                  "subtitle": "흥부네 박 열렸네",
+                  "categoryId": "cognitive",
+                  "groupIds": ["sarang"],
+                  "staff": ["김은비"],
+                  "staffRole": "준비",
+                  "location": "강당",
+                  "tags": ["인지", "사랑반"]
+                },
+                {
+                  "id": "2026-03-23-1500-mideum-somang-pattern",
+                  "title": "색상패턴",
+                  "subtitle": "",
+                  "categoryId": "cognitive",
+                  "groupIds": ["mideum", "somang"],
+                  "staff": [],
+                  "staffRole": "",
+                  "location": "강당",
+                  "tags": ["인지", "믿음반", "소망반"]
+                },
+                {
+                  "id": "2026-03-23-1500-all-connect",
+                  "title": "연결하기",
+                  "subtitle": "",
+                  "categoryId": "cognitive",
+                  "groupIds": ["all"],
+                  "staff": ["김은비"],
+                  "staffRole": "준비",
+                  "location": "강당",
+                  "tags": ["인지", "전체"]
+                }
+              ]
+            },
+            {
+              "id": "2026-03-23-1600-dinner",
+              "start": "16:00",
+              "end": "17:00",
+              "startMin": 960,
+              "endMin": 1020,
+              "section": "공통",
+              "entries": [
+                {
+                  "id": "2026-03-23-1600-dinner-entry",
+                  "title": "저녁식사",
+                  "subtitle": "",
+                  "categoryId": "meal",
+                  "groupIds": ["all"],
+                  "staff": [],
+                  "staffRole": "",
+                  "location": "강당",
+                  "tags": ["저녁", "전체"]
+                }
+              ]
+            },
+            {
+              "id": "2026-03-23-1700-dropoff",
+              "start": "17:00",
+              "end": "18:00",
+              "startMin": 1020,
+              "endMin": 1080,
+              "section": "공통",
+              "entries": [
+                {
+                  "id": "2026-03-23-1700-service-entry",
+                  "title": "오후 송영준비 및 송영서비스",
+                  "subtitle": "",
+                  "categoryId": "service",
+                  "groupIds": ["all"],
+                  "staff": [],
+                  "staffRole": "",
+                  "location": "강당",
+                  "tags": ["송영", "전체"]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  </script>
+  <script src="./assets/selectors.js"></script>
+  <script>
+    (function () {
+      var data = JSON.parse(document.getElementById("program-data").textContent);
+      var selectors = window.ProgramViewerSelectors;
+      var params = new URLSearchParams(window.location.search);
+      var at = params.get("at") || "2026-03-23T14:20";
+      var state = selectors.selectNowState(data, at, {});
+
+      var groups = {};
+      (data.taxonomies.groups || []).forEach(function (item) {
+        groups[item.id] = item;
+      });
+      var categories = {};
+      (data.taxonomies.categories || []).forEach(function (item) {
+        categories[item.id] = item;
+      });
+
+      function formatDateCopy(day) {
+        var parts = day.date.split("-");
+        return Number(parts[0]) + "년 " + Number(parts[1]) + "월 " + Number(parts[2]) + "일 " + day.weekday + "요일";
+      }
+
+      function formatClock(atParts) {
+        return String(atParts.hour).padStart(2, "0") + ":" + String(atParts.minute).padStart(2, "0");
+      }
+
+      function blockSummary(block) {
+        if (!block || !block.entries || block.entries.length === 0) {
+          return "일정 없음";
+        }
+        return block.entries.map(function (entry) {
+          return entry.title;
+        }).join(" / ");
+      }
+
+      function statusLabel(status) {
+        if (status === "in_block") return "현재 프로그램 진행 중";
+        if (status === "before_open") return "첫 프로그램 시작 전";
+        if (status === "after_close") return "오늘 운영 종료";
+        if (status === "between_blocks") return "블록 사이 시간";
+        return "운영 정보 없음";
+      }
+
+      function statusCopy(state) {
+        if (state.status === "in_block" && state.block) {
+          return "지금은 " + state.block.start + "부터 " + state.block.end + "까지의 시간 블록입니다. 남은 시간은 " + state.remainingMinutes + "분입니다.";
+        }
+        if (state.status === "before_open" && state.nextBlock) {
+          return "아직 첫 프로그램 전입니다. 다음 블록은 " + state.nextBlock.start + "에 시작합니다.";
+        }
+        if (state.status === "between_blocks" && state.nextBlock) {
+          return "현재는 블록 사이 시간입니다. 다음 블록까지 " + state.upcomingMinutes + "분 남았습니다.";
+        }
+        if (state.status === "after_close") {
+          return "오늘의 마지막 시간 블록이 종료된 상태입니다.";
+        }
+        return "선택한 시각에 해당하는 데이터가 없습니다.";
+      }
+
+      function renderEntry(entry) {
+        var groupLabels = (entry.groupIds || []).map(function (id) {
+          return groups[id] ? groups[id].label : id;
+        });
+        var categoryLabel = categories[entry.categoryId] ? categories[entry.categoryId].label : entry.categoryId;
+        var staffCopy;
+        if (entry.staff && entry.staff.length > 0) {
+          staffCopy = entry.staffRole ? entry.staffRole + ": " + entry.staff.join(", ") : entry.staff.join(", ");
+        } else {
+          staffCopy = "담당자 없음";
+        }
+
+        return [
+          '<article class="entry-card">',
+          '  <div class="entry-top">',
+          "    <div>",
+          "      <h3>" + entry.title + "</h3>",
+          "      <p>" + (entry.subtitle || "부제 없음") + "</p>",
+          "    </div>",
+          '    <div class="pills">',
+          groupLabels.map(function (label) {
+            return '<span class="pill">' + label + "</span>";
+          }).join(""),
+          '      <span class="pill">' + categoryLabel + "</span>",
+          "    </div>",
+          "  </div>",
+          '  <div class="entry-meta">',
+          "    <span>" + staffCopy + "</span>",
+          "    <span>장소: " + (entry.location || "-") + "</span>",
+          "  </div>",
+          "</article>"
+        ].join("");
+      }
+
+      function renderTimelineItem(item, activeId) {
+        var activeClass = item.id === activeId ? "timeline-item active" : "timeline-item";
+        return [
+          '<div class="' + activeClass + '">',
+          "  <strong>" + item.start + " - " + item.end + "</strong>",
+          "  <span>" + item.section + " · " + item.count + "개 활동</span>",
+          "</div>"
+        ].join("");
+      }
+
+      document.getElementById("clock-title").textContent = formatClock(state.at);
+      document.getElementById("date-copy").textContent = state.day ? formatDateCopy(state.day) : "일치하는 날짜 데이터가 없습니다.";
+      document.getElementById("status-badge").textContent = statusLabel(state.status);
+      document.getElementById("block-time").textContent = state.block ? state.block.start + " - " + state.block.end : "현재 블록 없음";
+      document.getElementById("block-meta").innerHTML = state.block
+        ? '<span>' + state.block.section + '</span><span>강당 담당: ' + (state.day.venueManager || "-") + "</span>"
+        : "<span>운영 정보 없음</span>";
+      document.getElementById("status-copy").textContent = statusCopy(state);
+
+      document.getElementById("prev-time").textContent = state.prevBlock ? state.prevBlock.start + " - " + state.prevBlock.end : "이전 블록 없음";
+      document.getElementById("prev-copy").textContent = state.prevBlock ? blockSummary(state.prevBlock) : "앞선 일정이 없습니다.";
+      document.getElementById("next-time").textContent = state.nextBlock ? state.nextBlock.start + " - " + state.nextBlock.end : "다음 블록 없음";
+      document.getElementById("next-copy").textContent = state.nextBlock ? blockSummary(state.nextBlock) : "남은 일정이 없습니다.";
+
+      var entryList = document.getElementById("entry-list");
+      if (state.visibleEntries.length === 0) {
+        entryList.innerHTML = '<p class="empty">현재 블록에 표시할 활동이 없습니다.</p>';
+      } else {
+        entryList.innerHTML = state.visibleEntries.map(renderEntry).join("");
+      }
+
+      var timeline = document.getElementById("timeline");
+      var items = state.day ? selectors.selectTimeline(state.day) : [];
+      timeline.innerHTML = items.map(function (item) {
+        return renderTimelineItem(item, state.block && state.block.id);
+      }).join("");
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+{
+  "meta": {
+    "title": "주간프로그램 계획표",
+    "timezone": "Asia/Seoul",
+    "generatedAt": "2026-03-18T14:00:00+09:00",
+    "defaultView": "now",
+    "sourceLabel": "3월 4주차"
+  },
+  "taxonomies": {
+    "groups": [
+      {
+        "id": "sarang",
+        "label": "사랑반",
+        "color": "#F3B6B0"
+      },
+      {
+        "id": "mideum",
+        "label": "믿음반",
+        "color": "#B9D7A8"
+      },
+      {
+        "id": "somang",
+        "label": "소망반",
+        "color": "#A8D5F2"
+      },
+      {
+        "id": "all",
+        "label": "전체",
+        "color": "#E6D7A8"
+      }
+    ],
+    "categories": [
+      {
+        "id": "service",
+        "label": "서비스"
+      },
+      {
+        "id": "routine",
+        "label": "일상"
+      },
+      {
+        "id": "cognitive",
+        "label": "인지"
+      },
+      {
+        "id": "physical",
+        "label": "신체"
+      },
+      {
+        "id": "rehab",
+        "label": "재활"
+      },
+      {
+        "id": "meal",
+        "label": "식사"
+      }
+    ]
+  },
+  "days": [
+    {
+      "date": "2026-03-23",
+      "weekday": "월",
+      "venueManager": "김은비",
+      "blocks": [
+        {
+          "id": "2026-03-23-1000-service",
+          "start": "10:00",
+          "end": "10:30",
+          "startMin": 600,
+          "endMin": 630,
+          "section": "오전",
+          "entries": [
+            {
+              "id": "2026-03-23-1000-checkin",
+              "title": "오전 등원서비스/건강관리",
+              "subtitle": "혈압, 체온체크",
+              "categoryId": "service",
+              "groupIds": [
+                "all"
+              ],
+              "staff": [],
+              "staffRole": "",
+              "location": "강당",
+              "tags": [
+                "등원",
+                "건강관리",
+                "전체"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "2026-03-23-1030-program",
+          "start": "10:30",
+          "end": "11:30",
+          "startMin": 630,
+          "endMin": 690,
+          "section": "오전",
+          "entries": [
+            {
+              "id": "2026-03-23-1030-sarang-rehab",
+              "title": "재활",
+              "subtitle": "",
+              "categoryId": "rehab",
+              "groupIds": [
+                "sarang"
+              ],
+              "staff": [],
+              "staffRole": "",
+              "location": "강당",
+              "tags": [
+                "재활",
+                "사랑반"
+              ]
+            },
+            {
+              "id": "2026-03-23-1030-mideum-art",
+              "title": "미술활동",
+              "subtitle": "목련꽃 필 무렵",
+              "categoryId": "cognitive",
+              "groupIds": [
+                "mideum"
+              ],
+              "staff": [
+                "김은비"
+              ],
+              "staffRole": "준비",
+              "location": "강당",
+              "tags": [
+                "인지",
+                "믿음반"
+              ]
+            },
+            {
+              "id": "2026-03-23-1030-somang-basketball",
+              "title": "농구",
+              "subtitle": "",
+              "categoryId": "physical",
+              "groupIds": [
+                "somang"
+              ],
+              "staff": [],
+              "staffRole": "",
+              "location": "강당",
+              "tags": [
+                "신체",
+                "소망반"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "2026-03-23-1130-lunch-prep",
+          "start": "11:30",
+          "end": "12:40",
+          "startMin": 690,
+          "endMin": 760,
+          "section": "공통",
+          "entries": [
+            {
+              "id": "2026-03-23-1130-lunch",
+              "title": "점심식사 준비",
+              "subtitle": "식사준비/투약 및 개인위생, 체온체크",
+              "categoryId": "meal",
+              "groupIds": [
+                "all"
+              ],
+              "staff": [],
+              "staffRole": "",
+              "location": "강당",
+              "tags": [
+                "식사",
+                "투약",
+                "전체"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "2026-03-23-1240-free",
+          "start": "12:40",
+          "end": "13:40",
+          "startMin": 760,
+          "endMin": 820,
+          "section": "공통",
+          "entries": [
+            {
+              "id": "2026-03-23-1240-self",
+              "title": "자율시간",
+              "subtitle": "재활-믿음반 / 강당담당:사랑반",
+              "categoryId": "routine",
+              "groupIds": [
+                "all"
+              ],
+              "staff": [],
+              "staffRole": "",
+              "location": "강당",
+              "tags": [
+                "자율시간",
+                "전체"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "2026-03-23-1340-snack",
+          "start": "13:40",
+          "end": "14:00",
+          "startMin": 820,
+          "endMin": 840,
+          "section": "오후",
+          "entries": [
+            {
+              "id": "2026-03-23-1340-routine",
+              "title": "오후간식 및 건강체조2",
+              "subtitle": "",
+              "categoryId": "routine",
+              "groupIds": [
+                "all"
+              ],
+              "staff": [
+                "강선진"
+              ],
+              "staffRole": "담당",
+              "location": "강당",
+              "tags": [
+                "간식",
+                "건강체조",
+                "전체"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "2026-03-23-1400-program",
+          "start": "14:00",
+          "end": "15:00",
+          "startMin": 840,
+          "endMin": 900,
+          "section": "오후",
+          "entries": [
+            {
+              "id": "2026-03-23-1400-sarang-cognitive",
+              "title": "다른 그림찾기",
+              "subtitle": "",
+              "categoryId": "cognitive",
+              "groupIds": [
+                "sarang"
+              ],
+              "staff": [
+                "김은비"
+              ],
+              "staffRole": "준비",
+              "location": "강당",
+              "tags": [
+                "인지",
+                "사랑반"
+              ]
+            },
+            {
+              "id": "2026-03-23-1400-mideum-physical",
+              "title": "고리던지기",
+              "subtitle": "",
+              "categoryId": "physical",
+              "groupIds": [
+                "mideum"
+              ],
+              "staff": [],
+              "staffRole": "",
+              "location": "강당",
+              "tags": [
+                "신체",
+                "믿음반"
+              ]
+            },
+            {
+              "id": "2026-03-23-1400-somang-rehab",
+              "title": "재활",
+              "subtitle": "",
+              "categoryId": "rehab",
+              "groupIds": [
+                "somang"
+              ],
+              "staff": [],
+              "staffRole": "",
+              "location": "강당",
+              "tags": [
+                "재활",
+                "소망반"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "2026-03-23-1500-program",
+          "start": "15:00",
+          "end": "16:00",
+          "startMin": 900,
+          "endMin": 960,
+          "section": "오후",
+          "entries": [
+            {
+              "id": "2026-03-23-1500-sarang-origami",
+              "title": "종이접기",
+              "subtitle": "흥부네 박 열렸네",
+              "categoryId": "cognitive",
+              "groupIds": [
+                "sarang"
+              ],
+              "staff": [
+                "김은비"
+              ],
+              "staffRole": "준비",
+              "location": "강당",
+              "tags": [
+                "인지",
+                "사랑반"
+              ]
+            },
+            {
+              "id": "2026-03-23-1500-mideum-somang-pattern",
+              "title": "색상패턴",
+              "subtitle": "",
+              "categoryId": "cognitive",
+              "groupIds": [
+                "mideum",
+                "somang"
+              ],
+              "staff": [],
+              "staffRole": "",
+              "location": "강당",
+              "tags": [
+                "인지",
+                "믿음반",
+                "소망반"
+              ]
+            },
+            {
+              "id": "2026-03-23-1500-all-connect",
+              "title": "연결하기",
+              "subtitle": "",
+              "categoryId": "cognitive",
+              "groupIds": [
+                "all"
+              ],
+              "staff": [
+                "김은비"
+              ],
+              "staffRole": "준비",
+              "location": "강당",
+              "tags": [
+                "인지",
+                "전체"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "2026-03-23-1600-dinner",
+          "start": "16:00",
+          "end": "17:00",
+          "startMin": 960,
+          "endMin": 1020,
+          "section": "공통",
+          "entries": [
+            {
+              "id": "2026-03-23-1600-dinner-entry",
+              "title": "저녁식사",
+              "subtitle": "",
+              "categoryId": "meal",
+              "groupIds": [
+                "all"
+              ],
+              "staff": [],
+              "staffRole": "",
+              "location": "강당",
+              "tags": [
+                "저녁",
+                "전체"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "2026-03-23-1700-dropoff",
+          "start": "17:00",
+          "end": "18:00",
+          "startMin": 1020,
+          "endMin": 1080,
+          "section": "공통",
+          "entries": [
+            {
+              "id": "2026-03-23-1700-service-entry",
+              "title": "오후 송영준비 및 송영서비스",
+              "subtitle": "",
+              "categoryId": "service",
+              "groupIds": [
+                "all"
+              ],
+              "staff": [],
+              "staffRole": "",
+              "location": "강당",
+              "tags": [
+                "송영",
+                "전체"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "flatEntries": [
+    {
+      "id": "2026-03-23-1400-sarang-cognitive",
+      "date": "2026-03-23",
+      "start": "14:00",
+      "end": "15:00",
+      "groupIds": [
+        "sarang"
+      ],
+      "categoryId": "cognitive",
+      "title": "다른 그림찾기",
+      "subtitle": "",
+      "staff": [
+        "김은비"
+      ],
+      "sortKey": "2026-03-23T14:00"
+    },
+    {
+      "id": "2026-03-23-1400-mideum-physical",
+      "date": "2026-03-23",
+      "start": "14:00",
+      "end": "15:00",
+      "groupIds": [
+        "mideum"
+      ],
+      "categoryId": "physical",
+      "title": "고리던지기",
+      "subtitle": "",
+      "staff": [],
+      "sortKey": "2026-03-23T14:00"
+    },
+    {
+      "id": "2026-03-23-1400-somang-rehab",
+      "date": "2026-03-23",
+      "start": "14:00",
+      "end": "15:00",
+      "groupIds": [
+        "somang"
+      ],
+      "categoryId": "rehab",
+      "title": "재활",
+      "subtitle": "",
+      "staff": [],
+      "sortKey": "2026-03-23T14:00"
+    }
+  ]
+}

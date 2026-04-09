@@ -1,16 +1,23 @@
 import { Link } from "react-router-dom";
+import bandiLogo from "../../반디로고.png";
 
-export function HeaderNav() {
+type Props = {
+  showCalendarLink?: boolean;
+  hideNav?: boolean;
+};
+
+export function HeaderNav({ showCalendarLink = false, hideNav = false }: Props) {
   return (
-    <header className="site-header">
+    <header className={`site-header ${hideNav ? "minimal" : ""}`}>
       <Link className="brand" to="/">
-        근퇴 관리
+        <img className="brand-logo" src={bandiLogo} alt="반디 로고" />
+        <span className="brand-text">반디</span>
       </Link>
-      <nav className="site-nav">
-        <Link to="/">오늘</Link>
-        <Link to="/tomorrow">내일</Link>
-        <Link to="/calendar">월간 캘린더</Link>
-      </nav>
+      {!hideNav && showCalendarLink ? (
+        <nav className="site-nav">
+          <Link to="/calendar">월간 캘린더</Link>
+        </nav>
+      ) : null}
     </header>
   );
 }
