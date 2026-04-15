@@ -446,6 +446,243 @@ body::before {
   opacity: 0;
 }
 
+body[data-page="calendar"] .pv-shell {
+  max-width: 1360px;
+  padding: 28px 22px 56px;
+}
+
+.pv-calendar-site-header,
+.pv-calendar-header-card,
+.pv-calendar-grid-shell {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(49, 53, 60, 0.08);
+  background: rgba(250, 245, 236, 0.88);
+  border-radius: 28px;
+  box-shadow: var(--pv-shadow-lg), 0 2px 0 rgba(255, 255, 255, 0.5) inset, 0 -10px 18px rgba(95, 79, 58, 0.035) inset;
+}
+
+.pv-calendar-site-header::before,
+.pv-calendar-header-card::before,
+.pv-calendar-grid-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.34), transparent 32%),
+    repeating-linear-gradient(0deg, transparent 0, transparent 10px, rgba(120,103,79,0.012) 10px, rgba(120,103,79,0.012) 11px);
+  pointer-events: none;
+}
+
+.pv-calendar-site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 999px;
+  margin-bottom: 28px;
+  overflow: visible;
+}
+
+.pv-calendar-site-header > *,
+.pv-calendar-header-card > *,
+.pv-calendar-grid-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pv-calendar-brand {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.pv-calendar-brand img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.pv-calendar-brand span {
+  font-family: var(--pv-font-display);
+  font-size: 1.34rem;
+  font-weight: 730;
+}
+
+.pv-calendar-home-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(49,53,60,0.08);
+  background: rgba(255,255,255,0.72);
+  text-decoration: none;
+  color: inherit;
+  font-weight: 700;
+}
+
+.pv-calendar-layout {
+  display: grid;
+  gap: 28px;
+}
+
+.pv-calendar-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 24px;
+}
+
+.pv-calendar-title {
+  margin: 0;
+  font-family: var(--pv-font-display);
+  font-size: clamp(2rem, 3.4vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.pv-calendar-controls {
+  display: flex;
+  gap: 12px;
+}
+
+.pv-calendar-month-select {
+  min-width: 210px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid rgba(49,53,60,0.08);
+  border-radius: 999px;
+  background: rgba(252, 248, 241, 0.9);
+  color: var(--pv-ink);
+  font: inherit;
+  font-weight: 650;
+}
+
+.pv-calendar-grid-shell {
+  padding: 18px;
+  background: rgba(247, 242, 234, 0.9);
+}
+
+.pv-calendar-grid-shuttle {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pv-weekday-chip {
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(49, 53, 60, 0.08);
+  font-size: 0.72rem;
+  font-weight: 760;
+  color: #6f747d;
+}
+
+.pv-weekday-chip.is-sunday {
+  color: #b75a64;
+}
+
+.pv-calendar-day-card {
+  min-height: 116px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid rgba(49, 53, 60, 0.08);
+  border-radius: 16px;
+  background: #fbf7f0;
+  box-shadow: var(--pv-shadow-md), 0 2px 0 rgba(255, 255, 255, 0.5) inset, 0 -10px 18px rgba(95, 79, 58, 0.035) inset;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.pv-calendar-day-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 24px rgba(95,79,58,0.14), 0 2px 0 rgba(255, 255, 255, 0.5) inset, 0 -10px 18px rgba(95, 79, 58, 0.035) inset;
+}
+
+.pv-calendar-day-card.empty-slot {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  cursor: default;
+}
+
+.pv-calendar-day-card.is-selected {
+  border-color: rgba(143,115,92,0.38);
+  box-shadow: 0 0 0 2px rgba(143,115,92,0.08), 0 18px 28px rgba(95,79,58,0.18), 0 2px 0 rgba(255, 255, 255, 0.5) inset, 0 -10px 18px rgba(95, 79, 58, 0.035) inset;
+}
+
+.pv-calendar-day-card.is-today {
+  border-color: rgba(191, 108, 67, 0.24);
+}
+
+.pv-calendar-day-card.is-sunday .pv-calendar-day-number,
+.pv-calendar-day-card.is-holiday .pv-calendar-day-number {
+  color: #b14d56;
+}
+
+.pv-calendar-day-card.is-sunday .pv-calendar-day-number small,
+.pv-calendar-day-card.is-holiday .pv-calendar-day-number small {
+  color: #c07d84;
+}
+
+.pv-calendar-day-number {
+  font-family: var(--pv-font-display);
+  font-size: 1.1rem;
+  font-weight: 660;
+  letter-spacing: -0.05em;
+  color: #4a4f58;
+}
+
+.pv-calendar-day-number small {
+  display: block;
+  margin: 4px 0 0;
+  font-family: var(--pv-font-body);
+  font-size: 0.7rem;
+  font-weight: 640;
+  color: #7b8089;
+}
+
+.pv-calendar-day-meta {
+  color: #7a7f87;
+  font-size: 0.74rem;
+  font-weight: 560;
+}
+
+.pv-calendar-day-note {
+  margin-top: auto;
+  min-height: 2.2em;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(49, 53, 60, 0.12);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: #7a7f87;
+  word-break: keep-all;
+}
+
+.pv-calendar-day-card.is-holiday .pv-calendar-day-note {
+  color: #9d6067;
+}
+
+.pv-calendar-day-note.is-empty {
+  opacity: 0.26;
+}
+
 .pv-entry-card,
 .pv-result-card {
   padding: 18px;
@@ -952,6 +1189,34 @@ a.pv-day-card {
 }
 
 @media (max-width: 760px) {
+  body[data-page="calendar"] .pv-shell {
+    padding: 18px 12px 32px;
+  }
+
+  .pv-calendar-site-header {
+    margin-bottom: 18px;
+  }
+
+  .pv-calendar-site-header,
+  .pv-calendar-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pv-calendar-brand img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .pv-calendar-brand span {
+    font-size: 1.18rem;
+  }
+
+  .pv-calendar-home-link,
+  .pv-calendar-month-select {
+    width: 100%;
+  }
+
   .pv-calendar-weekdays,
   .pv-calendar-grid {
     gap: 6px;

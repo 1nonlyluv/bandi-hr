@@ -8,6 +8,16 @@
     browse: "./program-browse.html",
     calendar: "./program-calendar.html"
   };
+  var WEEKDAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
+  var CALENDAR_SPECIAL_DAYS_2026 = {
+    "2026-03-01": { holidayName: "삼일절" },
+    "2026-03-02": { holidayName: "대체공휴일" },
+    "2026-03-05": { seasonalNames: ["경칩"] },
+    "2026-03-20": { seasonalNames: ["춘분"] },
+    "2026-04-04": { seasonalNames: ["한식"] },
+    "2026-04-05": { seasonalNames: ["청명", "식목일"] },
+    "2026-04-20": { seasonalNames: ["곡우"] }
+  };
 
   function escapeHtml(value) {
     return String(value || "")
@@ -352,6 +362,38 @@
       }
     }
     return parts[1] + "월 " + String(Math.max(1, sundayCount)) + "주차";
+  }
+
+  function getWeekdayNameFromDate(dateText) {
+    if (!dateText) {
+      return "";
+    }
+    var date = new Date(dateText + "T12:00:00");
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+    return WEEKDAY_NAMES[date.getDay()] || "";
+  }
+
+  function getCalendarSpecialInfo(dateText) {
+    var info = CALENDAR_SPECIAL_DAYS_2026[dateText] || {};
+    var holidayName = info.holidayName || "";
+    var seasonalNames = Array.isArray(info.seasonalNames) ? info.seasonalNames.slice() : [];
+    var noteParts = [];
+    if (holidayName) {
+      noteParts.push(holidayName);
+    }
+    seasonalNames.forEach(function (name) {
+      if (name && noteParts.indexOf(name) === -1) {
+        noteParts.push(name);
+      }
+    });
+    return {
+      isHoliday: Boolean(holidayName),
+      holidayName: holidayName,
+      seasonalNames: seasonalNames,
+      note: noteParts.join(" · ")
+    };
   }
 
   function formatNowDateLabel(day) {
@@ -964,6 +1006,29 @@
     return map;
   }
 
+  function buildCalendarMonthDays(monthKey, dayMap) {
+    var parts = String(monthKey || "").split("-").map(Number);
+    if (!parts[0] || !parts[1]) {
+      return [];
+    }
+    var year = parts[0];
+    var monthIndex = parts[1] - 1;
+    var totalDays = new Date(year, monthIndex + 1, 0).getDate();
+    var monthDays = [];
+    for (var dayNumber = 1; dayNumber <= totalDays; dayNumber += 1) {
+      var date = new Date(year, monthIndex, dayNumber);
+      var dateText = date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+      monthDays.push({
+        date: dateText,
+        number: dayNumber,
+        weekdayIndex: date.getDay(),
+        weekdayLabel: WEEKDAY_NAMES[date.getDay()] || "",
+        day: dayMap[dateText] || null
+      });
+    }
+    return monthDays;
+  }
+
   function buildCalendarMatrix(monthKey, dayMap) {
     var parts = String(monthKey || "").split("-").map(Number);
     if (!parts[0] || !parts[1]) {
@@ -1102,119 +1167,141 @@
     var dayMap = buildDayMap(days);
     var months = deriveMonths(days);
     var fallbackDate = paramsObj.date || nowParts.date || (days[0] ? days[0].date : "");
-    var currentMonthKey = dateToMonthKey(fallbackDate);
+    var fallbackMonthKey = dateToMonthKey(fallbackDate);
     var activeMonth = months.find(function (month) {
-      return month.key === currentMonthKey;
+      return month.key === fallbackMonthKey;
     }) || months[0] || null;
-    var visibleMonthKey = activeMonth ? activeMonth.key : currentMonthKey;
-    var visibleDays = days.filter(function (day) {
-      return dateToMonthKey(day.date) === visibleMonthKey;
-    });
-    var selectedDate = paramsObj.date && dayMap[paramsObj.date]
+    var activeMonthKey = activeMonth ? activeMonth.key : "";
+    var monthDays = buildCalendarMonthDays(activeMonthKey, dayMap);
+    var selectedDate = paramsObj.date && dateToMonthKey(paramsObj.date) === activeMonthKey
       ? paramsObj.date
-      : (visibleDays[0] ? visibleDays[0].date : (days[0] ? days[0].date : ""));
-    var selectedDay = selectedDate ? dayMap[selectedDate] : null;
+      : (monthDays.find(function (day) { return Boolean(day.day); }) || monthDays[0] || { date: "" }).date;
     var todayDate = nowParts.date || "";
-    var header = renderHeader("calendar", Object.assign({}, paramsObj, { date: selectedDate }));
-    var monthIndex = activeMonth ? months.findIndex(function (month) { return month.key === activeMonth.key; }) : -1;
-    var prevMonth = monthIndex > 0 ? months[monthIndex - 1] : null;
-    var nextMonth = monthIndex !== -1 && monthIndex < months.length - 1 ? months[monthIndex + 1] : null;
-    var weekLabels = ["일", "월", "화", "수", "목", "금", "토"];
-    var matrix = buildCalendarMatrix(visibleMonthKey, dayMap);
 
     root.innerHTML = [
-      header,
-      '<section class="pv-layout">',
-      '  <section class="pv-hero-grid">',
-      '    <section class="pv-card">',
-      '      <p class="pv-eyebrow">Calendar</p>',
-      '      <h1 class="pv-title">' + escapeHtml(activeMonth ? activeMonth.label : "달력 데이터 없음") + "</h1>",
-      '      <p class="pv-subtitle">날짜를 누르면 그날 프로그램과 담당자를 바로 확인할 수 있습니다.</p>',
-      '      <div class="pv-actions">',
-      (prevMonth ? '<a class="pv-action-link" href="' + pageHref("calendar", Object.assign({}, paramsObj, { date: prevMonth.key + "-01" })) + '">이전 달</a>' : ""),
-      (nextMonth ? '<a class="pv-action-link" href="' + pageHref("calendar", Object.assign({}, paramsObj, { date: nextMonth.key + "-01" })) + '">다음 달</a>' : ""),
-      '      </div>',
-      '    </section>',
-      '    <section class="pv-card">',
-      '      <p class="pv-eyebrow">선택 날짜</p>',
-      '      <h2 class="pv-day-date">' + escapeHtml(selectedDay ? formatDateLabel(selectedDay.date, selectedDay.weekday) : "날짜 없음") + "</h2>",
-      '      <p class="pv-subtitle">' + escapeHtml(selectedDay ? ("강당 담당: " + (selectedDay.venueManager || "-")) : "표시할 날짜가 없습니다.") + "</p>",
-      '      <div class="pv-inline-meta"><span>' + escapeHtml(selectedDay ? ((selectedDay.blocks || []).length + "개 블록") : "0개 블록") + '</span><span>' + escapeHtml(selectedDay ? getWeekOfMonthLabel(selectedDay.date) : "-") + "</span></div>",
-      '      <div class="pv-actions">' + (selectedDay ? '<a class="pv-action-link" href="' + pageHref("day", Object.assign({}, paramsObj, { date: selectedDay.date })) + '">하루 보기</a>' : "") + "</div>",
-      "    </section>",
+      '<header class="pv-calendar-site-header">',
+      '  <a class="pv-calendar-brand" href="' + pageHref("now", paramsObj) + '">',
+      '    <img src="./반디로고.png" alt="반디 로고" />',
+      '    <span>반디 프로그램</span>',
+      "  </a>",
+      '  <a class="pv-calendar-home-link" href="' + pageHref("now", paramsObj) + '">프로그램 홈</a>',
+      "</header>",
+      '<section class="pv-calendar-layout">',
+      '  <section class="pv-calendar-header-card">',
+      "    <div>",
+      '      <p class="pv-eyebrow">월별 프로그램 캘린더</p>',
+      '      <h1 class="pv-calendar-title">' + escapeHtml(activeMonth ? activeMonth.label : "달력 데이터 없음") + "</h1>",
+      "    </div>",
+      '    <div class="pv-calendar-controls">',
+      '      <select class="pv-calendar-month-select" id="pv-calendar-month-select">' + months.map(function (month) {
+        return '<option value="' + escapeHtml(month.key) + '"' + (month.key === activeMonthKey ? " selected" : "") + ">" + escapeHtml(month.label) + "</option>";
+      }).join("") + "</select>",
+      "    </div>",
       "  </section>",
-      '  <section class="pv-card">',
-      '    <p class="pv-eyebrow">월간 보기</p>',
-      '    <div class="pv-chip-row">' + months.map(function (month) {
-        var cls = activeMonth && month.key === activeMonth.key ? "pv-chip-link is-active" : "pv-chip-link";
-        var monthDate = month.key + "-01";
-        return '<a class="' + cls + '" href="' + pageHref("calendar", Object.assign({}, paramsObj, { date: monthDate })) + '">' + escapeHtml(month.label) + "</a>";
-      }).join("") + "</div>",
-      '    <section class="pv-calendar-board">',
-      '      <div class="pv-calendar-weekdays">' + weekLabels.map(function (label) {
-        return '<span class="pv-calendar-weekday">' + escapeHtml(label) + "</span>";
-      }).join("") + "</div>",
-      '      <div class="pv-calendar-grid">' + matrix.map(function (cell) {
-        var cls = "pv-calendar-cell";
-        if (!cell.isCurrentMonth) {
-          cls += " is-muted";
-        }
-        if (cell.date === todayDate) {
-          cls += " is-today";
-        }
-        if (cell.date === selectedDate) {
-          cls += " is-selected";
-        }
-        if (!cell.day) {
-          cls += " is-empty";
-        }
-        var href = pageHref("calendar", Object.assign({}, paramsObj, { date: cell.date }));
-        return [
-          '<a class="' + cls + '" href="' + href + '">',
-          '  <span class="pv-calendar-number">' + escapeHtml(String(cell.number)) + "</span>",
-          '  <span class="pv-calendar-date-hint">' + escapeHtml(getDateLabelShort(cell.date)) + "</span>",
-          cell.day ? ('  <span class="pv-calendar-count">' + escapeHtml(String((cell.day.blocks || []).length) + "개 블록") + "</span>") : '  <span class="pv-calendar-count is-empty">일정 없음</span>',
-          cell.day && cell.day.blocks && cell.day.blocks[0]
-            ? ('  <span class="pv-calendar-preview">' + escapeHtml(cell.day.blocks[0].start + " " + blockSummary(cell.day.blocks[0])) + "</span>")
-            : '  <span class="pv-calendar-preview is-empty"> </span>',
-          "</a>"
-        ].join("");
-      }).join("") + "</div>",
-      "    </section>",
-      "  </section>",
-      '  <section class="pv-content-grid">',
-      '    <section class="pv-card">',
-      '      <p class="pv-eyebrow">선택 날짜 요약</p>',
-      '      <div class="pv-calendar-list">' + (selectedDay ? summarizeDayBlocks(selectedDay).map(function (item) {
-        return [
-          '<article class="pv-day-card is-active">',
-          '  <strong class="pv-day-time">' + escapeHtml(item.time) + "</strong>",
-          '  <span class="pv-day-copy">' + escapeHtml(item.summary) + "</span>",
-          "</article>"
-        ].join("");
-      }).join("") : '<p class="pv-empty">선택한 날짜 일정이 없습니다.</p>') + "</div>",
-      "    </section>",
-      '    <section class="pv-card">',
-      '      <p class="pv-eyebrow">빠른 이동</p>',
-      '      <div class="pv-calendar-list">' + visibleDays.map(function (day) {
-        var cls = day.date === selectedDate ? "pv-day-card is-active" : "pv-day-card";
-        return [
-          '<a class="' + cls + '" href="' + pageHref("calendar", Object.assign({}, paramsObj, { date: day.date })) + '">',
-          '  <div class="pv-day-card-head">',
-          '    <div>',
-          '      <h2 class="pv-day-date">' + escapeHtml(day.weekday + "요일") + "</h2>",
-          '      <div class="pv-day-info">' + escapeHtml(getDateLabelShort(day.date)) + "</div>",
-          "    </div>",
-          '    <span class="pv-mini-chip">' + escapeHtml(String((day.blocks || []).length) + "개 블록") + "</span>",
-          "  </div>",
-          '  <div class="pv-day-copy">' + escapeHtml((day.blocks && day.blocks[0]) ? (day.blocks[0].start + " " + blockSummary(day.blocks[0])) : "일정 없음") + "</div>",
-          "</a>"
-        ].join("");
-      }).join("") + "</div>",
-      "    </section>",
+      '  <section class="pv-calendar-grid-shell">',
+      '    <div class="pv-calendar-grid-shuttle" id="pv-calendar-grid"></div>',
       "  </section>",
       "</section>"
     ].join("");
+
+    var monthSelect = root.querySelector("#pv-calendar-month-select");
+    var calendarGrid = root.querySelector("#pv-calendar-grid");
+    var state = {
+      activeMonthKey: activeMonthKey,
+      selectedDate: selectedDate
+    };
+
+    function syncCalendarUrl(replace) {
+      var nextUrl = new URL(window.location.href);
+      if (state.selectedDate) {
+        nextUrl.searchParams.set("date", state.selectedDate);
+      } else {
+        nextUrl.searchParams.delete("date");
+      }
+      if (replace) {
+        window.history.replaceState({ date: state.selectedDate }, "", nextUrl);
+      } else {
+        window.history.pushState({ date: state.selectedDate }, "", nextUrl);
+      }
+    }
+
+    function renderCalendarGrid() {
+      var visibleDays = buildCalendarMonthDays(state.activeMonthKey, dayMap);
+      var weekdayHeader = WEEKDAY_NAMES.map(function (weekday, index) {
+        return '<div class="pv-weekday-chip' + (index === 0 ? " is-sunday" : "") + '">' + escapeHtml(weekday) + "</div>";
+      }).join("");
+      var firstWeekday = visibleDays.length ? visibleDays[0].weekdayIndex : 0;
+      var leadingSlots = Array.from({ length: firstWeekday }, function () {
+        return '<div class="pv-calendar-day-card empty-slot" aria-hidden="true"></div>';
+      }).join("");
+      var dayCards = visibleDays.map(function (calendarDay) {
+        var special = getCalendarSpecialInfo(calendarDay.date);
+        var programCount = calendarDay.day && calendarDay.day.blocks ? calendarDay.day.blocks.length : 0;
+        var metaText = programCount ? ("프로그램 " + programCount + "개") : "일정 없음";
+        var noteText = special.note || "\u00A0";
+        var cardCls = "pv-calendar-day-card";
+        if (calendarDay.weekdayIndex === 0) {
+          cardCls += " is-sunday";
+        }
+        if (special.isHoliday) {
+          cardCls += " is-holiday";
+        }
+        if (state.selectedDate === calendarDay.date) {
+          cardCls += " is-selected";
+        }
+        if (todayDate === calendarDay.date) {
+          cardCls += " is-today";
+        }
+        return [
+          '<button type="button" class="' + cardCls + '" data-date="' + escapeHtml(calendarDay.date) + '">',
+          '  <span class="pv-calendar-day-number">' + escapeHtml(String(calendarDay.number)) + ' <small>' + escapeHtml(calendarDay.weekdayLabel) + "</small></span>",
+          '  <span class="pv-calendar-day-meta">' + escapeHtml(metaText) + "</span>",
+          '  <span class="pv-calendar-day-note' + (noteText.trim() ? "" : " is-empty") + '">' + escapeHtml(noteText) + "</span>",
+          "</button>"
+        ].join("");
+      }).join("");
+      calendarGrid.innerHTML = weekdayHeader + leadingSlots + dayCards;
+    }
+
+    function pickMonthDefaultDate(monthKey) {
+      var visibleDays = buildCalendarMonthDays(monthKey, dayMap);
+      var withPrograms = visibleDays.find(function (day) { return Boolean(day.day); });
+      return (withPrograms || visibleDays[0] || { date: "" }).date;
+    }
+
+    monthSelect.addEventListener("change", function (event) {
+      state.activeMonthKey = event.target.value;
+      state.selectedDate = pickMonthDefaultDate(state.activeMonthKey);
+      renderCalendarGrid();
+      syncCalendarUrl(false);
+    });
+
+    calendarGrid.addEventListener("click", function (event) {
+      var card = event.target.closest("[data-date]");
+      if (!card) {
+        return;
+      }
+      state.selectedDate = card.getAttribute("data-date") || "";
+      renderCalendarGrid();
+      syncCalendarUrl(false);
+    });
+
+    window.addEventListener("popstate", function () {
+      var nextParams = new URLSearchParams(window.location.search);
+      var nextDate = nextParams.get("date") || "";
+      var nextMonthKey = dateToMonthKey(nextDate) || state.activeMonthKey;
+      if (months.some(function (month) { return month.key === nextMonthKey; })) {
+        state.activeMonthKey = nextMonthKey;
+      }
+      state.selectedDate = nextDate || pickMonthDefaultDate(state.activeMonthKey);
+      if (monthSelect) {
+        monthSelect.value = state.activeMonthKey;
+      }
+      renderCalendarGrid();
+    });
+
+    renderCalendarGrid();
+    syncCalendarUrl(true);
   }
 
   function renderError(root, message) {
