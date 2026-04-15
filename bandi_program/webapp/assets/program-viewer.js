@@ -96,6 +96,18 @@
     return PAGE_FILES[page] + buildSearch(paramsObj);
   }
 
+  function currentNowHref(paramsObj) {
+    return pageHref("now", {
+      at: "",
+      date: "",
+      week: "",
+      q: "",
+      sort: "time",
+      groups: paramsObj && paramsObj.groups ? paramsObj.groups : [],
+      categories: paramsObj && paramsObj.categories ? paramsObj.categories : []
+    });
+  }
+
   function toggleListValue(list, value) {
     var next = (list || []).slice();
     var index = next.indexOf(value);
@@ -175,7 +187,7 @@
   function renderHeader(page, paramsObj) {
     return [
       '<header class="pv-header">',
-      '  <a class="pv-brand" href="' + pageHref("now", paramsObj) + '">',
+      '  <a class="pv-brand" href="' + currentNowHref(paramsObj) + '">',
       '    <img src="./반디로고.png" alt="반디 로고" />',
       '    <span class="pv-brand-text">반디 프로그램 뷰어</span>',
       "  </a>",
@@ -671,10 +683,9 @@
     if (!state.homeButton) {
       return;
     }
-    state.homeButton.addEventListener("click", function () {
-      state.isExpanded = false;
-      updateNowExpandedState(state);
-      setNowBlockIndex(state, state.currentBlockIndex, true);
+    state.homeButton.addEventListener("click", function (event) {
+      event.preventDefault();
+      window.location.href = currentNowHref(state.paramsObj);
     });
   }
 
@@ -735,10 +746,10 @@
       '<section class="pv-now-shell">',
       '  <div class="pv-now-floating-bar">',
       '    <div class="pv-now-floating-actions">',
-      '      <button type="button" class="pv-now-home" id="pv-now-home" aria-label="현재 시간대로 돌아가기">',
+      '      <a class="pv-now-home" href="' + currentNowHref(paramsObj) + '" id="pv-now-home" aria-label="현재 시간대로 돌아가기">',
       '        <img src="./반디로고.png" alt="반디 로고" />',
       '        <span class="pv-now-home-text">반디 프로그램</span>',
-      "      </button>",
+      "      </a>",
       '      <a class="pv-now-link" href="' + pageHref("calendar", Object.assign({}, paramsObj, { date: selectedDay ? selectedDay.date : "" })) + '">달력</a>',
       "    </div>",
       "  </div>",
@@ -1184,7 +1195,7 @@
     root.innerHTML = [
       '<div class="pv-now-floating-bar pv-calendar-floating-bar">',
       '  <div class="pv-now-floating-actions">',
-      '    <a class="pv-now-home" href="' + pageHref("now", paramsObj) + '" aria-label="프로그램 홈으로 돌아가기">',
+      '    <a class="pv-now-home" href="' + currentNowHref(paramsObj) + '" aria-label="프로그램 홈으로 돌아가기">',
       '    <img src="./반디로고.png" alt="반디 로고" />',
       '    <span class="pv-now-home-text">반디 프로그램</span>',
       "    </a>",
