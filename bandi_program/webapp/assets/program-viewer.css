@@ -487,6 +487,10 @@ body[data-page="calendar"] .pv-shell {
   margin-bottom: 28px;
 }
 
+.pv-calendar-floating-bar .pv-now-home {
+  text-decoration: none;
+}
+
 .pv-calendar-header-card {
   display: flex;
   align-items: center;
