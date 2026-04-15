@@ -717,9 +717,12 @@
     };
     var nowState = selectors.selectNowState(data, paramsObj.at, filters);
     var days = Array.isArray(data.days) ? data.days : [];
-    var selectedDay = nowState.day || days[0] || null;
+    var requestedDay = paramsObj.date ? selectors.selectDay(data, paramsObj.date) : null;
+    var selectedDay = requestedDay || nowState.day || days[0] || null;
     var blocks = sortBlocks(selectedDay && selectedDay.blocks);
-    var currentBlockIndex = getInitialNowBlockIndex(selectedDay, nowState);
+    var currentBlockIndex = requestedDay && (!nowState.day || requestedDay.date !== nowState.day.date)
+      ? 0
+      : getInitialNowBlockIndex(selectedDay, nowState);
     var blockIndex = currentBlockIndex;
     var groupMap = getMap(data.taxonomies.groups);
     var groupOrder = buildGroupOrderMap(data.taxonomies.groups);
@@ -1179,13 +1182,14 @@
     var todayDate = nowParts.date || "";
 
     root.innerHTML = [
-      '<header class="pv-calendar-site-header">',
-      '  <a class="pv-calendar-brand" href="' + pageHref("now", paramsObj) + '">',
+      '<div class="pv-now-floating-bar pv-calendar-floating-bar">',
+      '  <div class="pv-now-floating-actions">',
+      '    <a class="pv-now-home" href="' + pageHref("now", paramsObj) + '" aria-label="프로그램 홈으로 돌아가기">',
       '    <img src="./반디로고.png" alt="반디 로고" />',
-      '    <span>반디 프로그램</span>',
-      "  </a>",
-      '  <a class="pv-calendar-home-link" href="' + pageHref("now", paramsObj) + '">프로그램 홈</a>',
-      "</header>",
+      '    <span class="pv-now-home-text">반디 프로그램</span>',
+      "    </a>",
+      "  </div>",
+      "</div>",
       '<section class="pv-calendar-layout">',
       '  <section class="pv-calendar-header-card">',
       "    <div>",
@@ -1236,8 +1240,6 @@
       }).join("");
       var dayCards = visibleDays.map(function (calendarDay) {
         var special = getCalendarSpecialInfo(calendarDay.date);
-        var programCount = calendarDay.day && calendarDay.day.blocks ? calendarDay.day.blocks.length : 0;
-        var metaText = programCount ? ("프로그램 " + programCount + "개") : "일정 없음";
         var noteText = special.note || "\u00A0";
         var cardCls = "pv-calendar-day-card";
         if (calendarDay.weekdayIndex === 0) {
@@ -1255,7 +1257,6 @@
         return [
           '<button type="button" class="' + cardCls + '" data-date="' + escapeHtml(calendarDay.date) + '">',
           '  <span class="pv-calendar-day-number">' + escapeHtml(String(calendarDay.number)) + ' <small>' + escapeHtml(calendarDay.weekdayLabel) + "</small></span>",
-          '  <span class="pv-calendar-day-meta">' + escapeHtml(metaText) + "</span>",
           '  <span class="pv-calendar-day-note' + (noteText.trim() ? "" : " is-empty") + '">' + escapeHtml(noteText) + "</span>",
           "</button>"
         ].join("");
@@ -1282,8 +1283,7 @@
         return;
       }
       state.selectedDate = card.getAttribute("data-date") || "";
-      renderCalendarGrid();
-      syncCalendarUrl(false);
+      window.location.href = pageHref("now", Object.assign({}, paramsObj, { date: state.selectedDate }));
     });
 
     window.addEventListener("popstate", function () {

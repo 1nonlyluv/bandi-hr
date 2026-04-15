@@ -451,7 +451,6 @@ body[data-page="calendar"] .pv-shell {
   padding: 28px 22px 56px;
 }
 
-.pv-calendar-site-header,
 .pv-calendar-header-card,
 .pv-calendar-grid-shell {
   position: relative;
@@ -462,7 +461,6 @@ body[data-page="calendar"] .pv-shell {
   box-shadow: var(--pv-shadow-lg), 0 2px 0 rgba(255, 255, 255, 0.5) inset, 0 -10px 18px rgba(95, 79, 58, 0.035) inset;
 }
 
-.pv-calendar-site-header::before,
 .pv-calendar-header-card::before,
 .pv-calendar-grid-shell::before {
   content: "";
@@ -474,60 +472,19 @@ body[data-page="calendar"] .pv-shell {
   pointer-events: none;
 }
 
-.pv-calendar-site-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  border-radius: 999px;
-  margin-bottom: 28px;
-  overflow: visible;
-}
-
-.pv-calendar-site-header > *,
 .pv-calendar-header-card > *,
 .pv-calendar-grid-shell > * {
   position: relative;
   z-index: 1;
 }
 
-.pv-calendar-brand {
-  display: inline-flex;
-  gap: 14px;
-  align-items: center;
-  text-decoration: none;
-  color: inherit;
-}
-
-.pv-calendar-brand img {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-}
-
-.pv-calendar-brand span {
-  font-family: var(--pv-font-display);
-  font-size: 1.34rem;
-  font-weight: 730;
-}
-
-.pv-calendar-home-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(49,53,60,0.08);
-  background: rgba(255,255,255,0.72);
-  text-decoration: none;
-  color: inherit;
-  font-weight: 700;
-}
-
 .pv-calendar-layout {
   display: grid;
   gap: 28px;
+}
+
+.pv-calendar-floating-bar {
+  margin-bottom: 28px;
 }
 
 .pv-calendar-header-card {
@@ -658,16 +615,10 @@ body[data-page="calendar"] .pv-shell {
   color: #7b8089;
 }
 
-.pv-calendar-day-meta {
-  color: #7a7f87;
-  font-size: 0.74rem;
-  font-weight: 560;
-}
-
 .pv-calendar-day-note {
   margin-top: auto;
-  min-height: 2.2em;
-  padding-top: 8px;
+  min-height: 3.8em;
+  padding-top: 10px;
   border-top: 1px dashed rgba(49, 53, 60, 0.12);
   font-size: 0.72rem;
   line-height: 1.45;
@@ -1193,26 +1144,15 @@ a.pv-day-card {
     padding: 18px 12px 32px;
   }
 
-  .pv-calendar-site-header {
+  .pv-calendar-floating-bar {
     margin-bottom: 18px;
   }
 
-  .pv-calendar-site-header,
   .pv-calendar-header-card {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .pv-calendar-brand img {
-    width: 44px;
-    height: 44px;
-  }
-
-  .pv-calendar-brand span {
-    font-size: 1.18rem;
-  }
-
-  .pv-calendar-home-link,
   .pv-calendar-month-select {
     width: 100%;
   }
