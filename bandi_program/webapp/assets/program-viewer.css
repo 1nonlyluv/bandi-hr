@@ -608,6 +608,7 @@ body[data-page="calendar"] .pv-shell {
   font-weight: 660;
   letter-spacing: -0.05em;
   color: #4a4f58;
+  text-align: center;
 }
 
 .pv-calendar-day-number small {
@@ -617,6 +618,7 @@ body[data-page="calendar"] .pv-shell {
   font-size: 0.7rem;
   font-weight: 640;
   color: #7b8089;
+  text-align: center;
 }
 
 .pv-calendar-day-note {
