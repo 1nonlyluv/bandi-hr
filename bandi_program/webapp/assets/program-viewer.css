@@ -554,11 +554,11 @@ body[data-page="calendar"] .pv-shell {
 }
 
 .pv-calendar-day-card {
-  min-height: 116px;
-  padding: 10px;
+  min-height: 92px;
+  padding: 10px 10px 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   border: 1px solid rgba(49, 53, 60, 0.08);
   border-radius: 16px;
   background: #fbf7f0;
@@ -611,20 +611,10 @@ body[data-page="calendar"] .pv-shell {
   text-align: center;
 }
 
-.pv-calendar-day-number small {
-  display: block;
-  margin: 4px 0 0;
-  font-family: var(--pv-font-body);
-  font-size: 0.7rem;
-  font-weight: 640;
-  color: #7b8089;
-  text-align: center;
-}
-
 .pv-calendar-day-note {
   margin-top: auto;
-  min-height: 3.8em;
-  padding-top: 10px;
+  min-height: 2.9em;
+  padding-top: 8px;
   border-top: 1px dashed rgba(49, 53, 60, 0.12);
   font-size: 0.72rem;
   line-height: 1.45;

@@ -1256,7 +1256,7 @@
         }
         return [
           '<button type="button" class="' + cardCls + '" data-date="' + escapeHtml(calendarDay.date) + '">',
-          '  <span class="pv-calendar-day-number">' + escapeHtml(String(calendarDay.number)) + ' <small>' + escapeHtml(calendarDay.weekdayLabel) + "</small></span>",
+          '  <span class="pv-calendar-day-number">' + escapeHtml(String(calendarDay.number)) + "</span>",
           '  <span class="pv-calendar-day-note' + (noteText.trim() ? "" : " is-empty") + '">' + escapeHtml(noteText) + "</span>",
           "</button>"
         ].join("");
