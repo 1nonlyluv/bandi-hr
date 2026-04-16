@@ -855,6 +855,7 @@ a.pv-day-card {
   color: var(--pv-ink);
   font: inherit;
   font-weight: 760;
+  text-decoration: none;
 }
 
 .pv-now-home img {
