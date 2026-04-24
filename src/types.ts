@@ -23,6 +23,7 @@ export type EmployeeDayRecord = {
   workWeight: DutyWeight;
   offWeight: DutyWeight;
   trainingWeight: DutyWeight;
+  specialDisplayTag?: "교육" | "경조";
 };
 
 export type DaySummary = {
@@ -36,6 +37,8 @@ export type DaySummary = {
   kitchenDutyGroup: string;
   holidayName: string;
   remarks: string;
+  actualWorkEmployeeCount: number;
+  totalWorkEmployeeCount: number;
   workEmployees: EmployeeDayRecord[];
   offEmployees: EmployeeDayRecord[];
   allEmployees: EmployeeDayRecord[];

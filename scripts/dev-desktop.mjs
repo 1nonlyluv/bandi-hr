@@ -5,8 +5,8 @@ import {
   DEV_BINARY_PATH,
   compileDesktopBinary,
   resolveLocalBin,
-  run,
 } from "./desktop-common.mjs";
+import { buildScheduleData, startScheduleWatcher } from "./schedule-watch.mjs";
 
 const DEV_SERVER_URL = "http://127.0.0.1:4173";
 
@@ -16,7 +16,8 @@ function stripAnsi(value) {
 
 async function main() {
   await fs.mkdir(BUILD_DIR, { recursive: true });
-  await run("node", ["scripts/build-schedule-data.mjs"]);
+  await buildScheduleData();
+  const watcher = startScheduleWatcher();
   await compileDesktopBinary(DEV_BINARY_PATH);
 
   const vite = spawn(resolveLocalBin("vite"), ["--host", "127.0.0.1", "--port", "4173", "--strictPort"], {
@@ -27,6 +28,7 @@ async function main() {
   let started = false;
 
   const shutdown = (code = 0) => {
+    watcher.close();
     if (desktop && !desktop.killed) {
       desktop.kill("SIGTERM");
     }

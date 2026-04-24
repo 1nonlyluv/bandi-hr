@@ -369,6 +369,7 @@ function assignmentToRecord(employee: AdminEmployee, assignment: AdminAssignment
     name: employee.name,
     position: employee.position,
     groupName: employee.groupName,
+    specialDisplayTag: undefined,
   };
 
   if (!assignment) {
@@ -392,6 +393,7 @@ function assignmentToRecord(employee: AdminEmployee, assignment: AdminAssignment
       workWeight: 0,
       offWeight: 0,
       trainingWeight: 1,
+      specialDisplayTag: "교육",
     };
   }
 
@@ -420,6 +422,7 @@ function assignmentToRecord(employee: AdminEmployee, assignment: AdminAssignment
         workWeight: 0.5,
         offWeight: 0.5,
         trainingWeight: 0,
+        specialDisplayTag: undefined,
       };
     default:
       return {
@@ -430,6 +433,7 @@ function assignmentToRecord(employee: AdminEmployee, assignment: AdminAssignment
         workWeight: 0,
         offWeight: 1,
         trainingWeight: 0,
+        specialDisplayTag: assignment.leaveType === "경조사" ? "경조" : undefined,
       };
   }
 }
@@ -454,6 +458,8 @@ export function adminDraftToScheduleData(draft: AdminDraft): ScheduleData {
           kitchenDutyGroup: "",
           holidayName,
           remarks,
+          actualWorkEmployeeCount: 0,
+          totalWorkEmployeeCount: 0,
           workEmployees: [],
           offEmployees: [],
           allEmployees: [],
@@ -461,11 +467,13 @@ export function adminDraftToScheduleData(draft: AdminDraft): ScheduleData {
       }
 
       const allEmployees = employees.map((employee) => assignmentToRecord(employee, getAssignment(draft, day.date, employee.id)));
-      const workEmployees = allEmployees.filter((row) => row.workWeight > 0 || row.trainingWeight > 0);
-      const offEmployees = allEmployees.filter((row) => row.offWeight > 0);
+      const workEmployees = allEmployees.filter((row) => row.workWeight > 0 || row.trainingWeight > 0 || row.leaveType === "경조사");
+      const offEmployees = allEmployees.filter((row) => row.offWeight > 0 && row.leaveType !== "경조사");
       const actualWorkCount = normalizeWeight(allEmployees.reduce((sum, row) => sum + row.workWeight, 0));
       const trainingCount = normalizeWeight(allEmployees.reduce((sum, row) => sum + row.trainingWeight, 0));
-      const offCount = normalizeWeight(allEmployees.reduce((sum, row) => sum + row.offWeight, 0));
+      const offCount = normalizeWeight(offEmployees.reduce((sum, row) => sum + row.offWeight, 0));
+      const actualWorkEmployeeCount = allEmployees.filter((row) => row.workWeight > 0).length;
+      const totalWorkEmployeeCount = workEmployees.length;
 
       return {
         date: day.date,
@@ -474,10 +482,15 @@ export function adminDraftToScheduleData(draft: AdminDraft): ScheduleData {
         actualWorkCount,
         trainingCount,
         offCount,
-        workDisplayText: trainingCount > 0 ? `${formatWeight(actualWorkCount)} (+ 교육 ${formatWeight(trainingCount)})` : formatWeight(actualWorkCount),
+        workDisplayText:
+          totalWorkEmployeeCount > actualWorkEmployeeCount
+            ? `${formatWeight(actualWorkEmployeeCount)}(${formatWeight(totalWorkEmployeeCount)})`
+            : formatWeight(actualWorkEmployeeCount),
         kitchenDutyGroup: day.kitchenDutyGroup,
         holidayName,
         remarks,
+        actualWorkEmployeeCount,
+        totalWorkEmployeeCount,
         workEmployees,
         offEmployees,
         allEmployees,

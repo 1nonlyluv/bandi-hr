@@ -1,6 +1,8 @@
 import Workbook from "exceljs/lib/doc/workbook.js";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
+import officialHolidayData from "../src/data/official-holidays.json" with { type: "json" };
 
 const EMPLOYEE_START = 6;
 const EMPLOYEE_END = 25;
@@ -8,6 +10,8 @@ const DATE_COLUMN_START = 7;
 const DATE_COLUMN_END = 37;
 const HOLIDAY_API_URL = "https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo";
 const HOLIDAY_ENV_KEY = "DATA_GO_KR_SERVICE_KEY";
+const FIXED_HOLIDAYS = officialHolidayData.fixedHolidays;
+const DATED_HOLIDAYS = officialHolidayData.datedHolidays;
 const WANTED_OFF_FILL = "FFDAEEF3";
 const MEETING_OVERRIDE_DATE = "2026-03-03";
 const GROUP_RULES = [
@@ -18,11 +22,14 @@ const GROUP_RULES = [
 const KITCHEN_GROUPS = ["소망반", "믿음반", "사랑반"];
 const KITCHEN_ANCHOR = new Date("2026-03-01T00:00:00+09:00");
 const KITCHEN_TEACHER_NAME = "김계순";
-const KITCHEN_TEACHER_OFF_REMARK = "주방 선생님 휴무";
+const KITCHEN_TEACHER_OFF_REMARK = "주방 휴무";
 const REMARK_LEGEND_VALUES = new Set([
   "근무",
   "휴무",
   "연차",
+  "교육",
+  "경조",
+  "경조사",
   "주방담당반",
   "원하는 휴무",
   "오전반차",
@@ -49,6 +56,11 @@ function toIsoDate(date) {
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
   const day = `${date.getDate()}`.padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function fromIsoDate(iso) {
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Date(year, month - 1, day);
 }
 
 function normalizeWeight(value) {
@@ -86,10 +98,15 @@ function kitchenDutyGroup(date) {
   return KITCHEN_GROUPS[((weekOffset % KITCHEN_GROUPS.length) + KITCHEN_GROUPS.length) % KITCHEN_GROUPS.length];
 }
 
-function groupNameFor(monthKey, row) {
-  if (monthKey !== "2026-03") return "-";
+function groupNameFor(position, row) {
+  if (position === "대표") return "대표";
+  if (["시설장", "사무원", "사회복지사", "간호조무사"].includes(position)) return "운영지원팀";
+  if (position === "조리원") return "";
   const matched = GROUP_RULES.find((rule) => row >= rule.start && row <= rule.end);
-  return matched?.name ?? "-";
+  if (position === "요양보호사" || position === "요양팀장") {
+    return matched?.name ?? "";
+  }
+  return "";
 }
 
 function isSunday(date) {
@@ -194,6 +211,15 @@ function findRemarksRow(worksheet, columns) {
   return bestRow;
 }
 
+function columnHasMarker(worksheet, column, marker) {
+  for (let row = EMPLOYEE_END + 1; row <= Math.min(worksheet.actualRowCount, EMPLOYEE_END + 12); row += 1) {
+    if (normalizeWhitespace(cellText(worksheet, `${column}${row}`)) === marker) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function decodeXml(value) {
   return value
     .replaceAll("&lt;", "<")
@@ -218,9 +244,69 @@ function mergeRemarkParts(parts) {
   return unique.join(" · ");
 }
 
+function formatEmployeeNoteLine(row) {
+  return row.groupName ? `${row.name} (${row.groupName})` : row.name;
+}
+
+function buildSpecialNoteLines(label, rows, fallbackCount = 0) {
+  const count = rows.length || fallbackCount;
+  if (!count) return [];
+
+  const lines = [`${label} ${count}`];
+  if (rows.length) {
+    lines.push(...rows.map(formatEmployeeNoteLine));
+  }
+  return lines;
+}
+
 function isKnownHolidayText(value) {
   if (!value) return false;
   return /(공휴일|삼일절|현충일|광복절|개천절|한글날|어린이날|설날|추석|성탄절|부처님 오신 날)/.test(value);
+}
+
+function buildFallbackHolidayMap(monthKeys) {
+  const fallbackMap = new Map();
+  const years = [...new Set(monthKeys.map((monthKey) => Number(monthKey.slice(0, 4))))].sort((left, right) => left - right);
+
+  const addHoliday = (dateIso, name) => {
+    if (!fallbackMap.has(dateIso)) {
+      fallbackMap.set(dateIso, name);
+    }
+  };
+
+  const addObservedHoliday = (year, month, day, holidayName) => {
+    const holidayDate = new Date(year, month - 1, day);
+    const weekday = holidayDate.getDay();
+    if (weekday !== 0 && weekday !== 6) {
+      return;
+    }
+
+    const observedName = `${holidayName} 대체공휴일`;
+    const observedDate = new Date(year, month - 1, day);
+    do {
+      observedDate.setDate(observedDate.getDate() + 1);
+    } while (observedDate.getDay() === 0 || observedDate.getDay() === 6 || fallbackMap.has(toIsoDate(observedDate)));
+
+    addHoliday(toIsoDate(observedDate), observedName);
+  };
+
+  for (const year of years) {
+    for (const holiday of FIXED_HOLIDAYS) {
+      const dateIso = toIsoDate(new Date(year, holiday.month - 1, holiday.day));
+      addHoliday(dateIso, holiday.name);
+      if (holiday.observed) {
+        addObservedHoliday(year, holiday.month, holiday.day, holiday.name);
+      }
+    }
+  }
+
+  for (const holiday of DATED_HOLIDAYS) {
+    const year = Number(holiday.date.slice(0, 4));
+    if (!years.includes(year)) continue;
+    addHoliday(holiday.date, holiday.name);
+  }
+
+  return fallbackMap;
 }
 
 async function loadEnvFiles(cwd) {
@@ -255,7 +341,7 @@ async function findWorkbookFile(cwd) {
   const workbooks = [];
 
   for (const entry of entries) {
-    if (!entry.isFile() || !entry.name.endsWith(".xlsx")) continue;
+    if (!entry.isFile() || !entry.name.endsWith(".xlsx") || entry.name.startsWith("~$")) continue;
     const stats = await fs.stat(path.join(cwd, entry.name));
     workbooks.push({ name: entry.name, modifiedAt: stats.mtimeMs });
   }
@@ -269,12 +355,12 @@ async function findWorkbookFile(cwd) {
 }
 
 async function fetchHolidayMap(monthKeys) {
+  const holidayMap = buildFallbackHolidayMap(monthKeys);
   const serviceKey = process.env[HOLIDAY_ENV_KEY];
   if (!serviceKey) {
-    return new Map();
+    return holidayMap;
   }
 
-  const holidayMap = new Map();
   const uniqueMonths = [...new Set(monthKeys)].sort();
 
   for (const monthKey of uniqueMonths) {
@@ -304,11 +390,39 @@ async function fetchHolidayMap(monthKeys) {
     } catch (error) {
       console.warn(`Holiday API lookup failed for ${monthKey}; continuing without API holidays.`);
       console.warn(error instanceof Error ? error.message : error);
-      return holidayMap;
+      continue;
     }
   }
 
   return holidayMap;
+}
+
+async function sleep(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function loadWorkbookFile(workbookPath) {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const tempPath = path.join(os.tmpdir(), `bandihr-workbook-${process.pid}-${Date.now()}-${attempt}.xlsx`);
+
+    try {
+      await fs.copyFile(workbookPath, tempPath);
+      const workbook = new Workbook();
+      await workbook.xlsx.readFile(tempPath);
+      await fs.rm(tempPath, { force: true });
+      return workbook;
+    } catch (error) {
+      lastError = error;
+      await fs.rm(tempPath, { force: true }).catch(() => {});
+      if (attempt < 3) {
+        await sleep(400);
+      }
+    }
+  }
+
+  throw lastError;
 }
 
 async function build() {
@@ -319,8 +433,7 @@ async function build() {
   const workbookPath = path.resolve(cwd, workbookName);
   const workbookStats = await fs.stat(workbookPath);
 
-  const workbook = new Workbook();
-  await workbook.xlsx.readFile(workbookPath);
+  const workbook = await loadWorkbookFile(workbookPath);
 
   const monthsByKey = new Map();
   const columns = columnsBetween(DATE_COLUMN_START, DATE_COLUMN_END);
@@ -355,7 +468,7 @@ async function build() {
         employeeId: `${name}|${cellText(worksheet, `E${row}`)}`,
         name,
         position: cellText(worksheet, `E${row}`),
-        groupName: groupNameFor(monthKey, row),
+        groupName: groupNameFor(cellText(worksheet, `E${row}`), row),
       });
     }
 
@@ -375,9 +488,12 @@ async function build() {
       const holidayName = holidayMap.get(dateIso) ?? "";
       const manualRemark = remarksRow ? normalizeWhitespace(cellText(worksheet, `${column}${remarksRow}`)) : "";
       const isHoliday = Boolean(holidayName || isKnownHolidayText(manualRemark));
+      const hasEducationMarker = columnHasMarker(worksheet, column, "교육");
+      const hasBereavementMarker = columnHasMarker(worksheet, column, "경조") || columnHasMarker(worksheet, column, "경조사");
       monthDates.push(dateIso);
 
       if (isSunday(date)) {
+        const sundayRemarks = mergeRemarkParts([manualRemark, holidayName]);
         days.push({
           date: dateIso,
           isSundayClosed: true,
@@ -388,7 +504,9 @@ async function build() {
           workDisplayText: "-",
           kitchenDutyGroup: "",
           holidayName,
-          remarks: mergeRemarkParts([manualRemark, holidayName]),
+          remarks: sundayRemarks,
+          actualWorkEmployeeCount: 0,
+          totalWorkEmployeeCount: 0,
           workEmployees: [],
           offEmployees: [],
           allEmployees: [],
@@ -410,16 +528,28 @@ async function build() {
           workWeight: normalizeWeight(record.workWeight),
           offWeight: normalizeWeight(record.offWeight),
           trainingWeight: normalizeWeight(record.trainingWeight),
+          specialDisplayTag: record.dutyKind === "TRAINING" ? "교육" : record.leaveType === "경조사" ? "경조" : undefined,
         };
       });
 
-      const workEmployees = records.filter((row) => row.workWeight > 0 || row.trainingWeight > 0);
-      const offEmployees = records.filter((row) => row.offWeight > 0);
+      const trainingEmployees = records.filter((row) => row.trainingWeight > 0);
+      const bereavementEmployees = records.filter((row) => row.leaveType === "경조사");
+      const workEmployees = records.filter((row) => row.workWeight > 0 || row.trainingWeight > 0 || row.leaveType === "경조사");
+      const offEmployees = records.filter((row) => row.offWeight > 0 && row.leaveType !== "경조사");
       const actualWorkCount = normalizeWeight(records.reduce((sum, row) => sum + row.workWeight, 0));
       const trainingCount = normalizeWeight(records.reduce((sum, row) => sum + row.trainingWeight, 0));
-      const offCount = normalizeWeight(records.reduce((sum, row) => sum + row.offWeight, 0));
+      const offCount = normalizeWeight(offEmployees.reduce((sum, row) => sum + row.offWeight, 0));
+      const actualWorkEmployeeCount = records.filter((row) => row.workWeight > 0).length;
+      const totalWorkEmployeeCount = workEmployees.length;
       const kitchenTeacherOff = isWeekday(date) && offEmployees.some((row) => row.name === KITCHEN_TEACHER_NAME);
-      const remarks = mergeRemarkParts([manualRemark, holidayName, kitchenTeacherOff ? KITCHEN_TEACHER_OFF_REMARK : ""]);
+      const headerRemark = mergeRemarkParts([manualRemark, holidayName, kitchenTeacherOff ? KITCHEN_TEACHER_OFF_REMARK : ""]);
+      const educationFallbackCount = trainingEmployees.length === 0 && hasEducationMarker ? 1 : 0;
+      const bereavementFallbackCount = bereavementEmployees.length === 0 && hasBereavementMarker ? 1 : 0;
+      const specialNoteLines = [
+        ...buildSpecialNoteLines("교육", trainingEmployees, educationFallbackCount),
+        ...buildSpecialNoteLines("경조", bereavementEmployees, bereavementFallbackCount),
+      ];
+      const remarks = [headerRemark, ...specialNoteLines].filter(Boolean).join("\n");
 
       days.push({
         date: dateIso,
@@ -428,10 +558,15 @@ async function build() {
         actualWorkCount,
         trainingCount,
         offCount,
-        workDisplayText: trainingCount > 0 ? `${formatWeight(actualWorkCount)} (+ 교육 ${formatWeight(trainingCount)})` : formatWeight(actualWorkCount),
+        workDisplayText:
+          totalWorkEmployeeCount > actualWorkEmployeeCount
+            ? `${formatWeight(actualWorkEmployeeCount)}(${formatWeight(totalWorkEmployeeCount)})`
+            : formatWeight(actualWorkEmployeeCount),
         kitchenDutyGroup: kitchenDutyGroup(date),
         holidayName,
         remarks,
+        actualWorkEmployeeCount,
+        totalWorkEmployeeCount,
         workEmployees,
         offEmployees,
         allEmployees: records,

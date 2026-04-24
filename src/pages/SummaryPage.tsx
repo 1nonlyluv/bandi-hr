@@ -50,7 +50,7 @@ export function SummaryPage({ day }: Props) {
             </Link>
           </div>
           <div className="hero-actions">
-            <Link className="nav-link" to="/calendar">
+            <Link className="nav-link" to={`/calendar?date=${day.date}`}>
               월간 캘린더
             </Link>
           </div>

@@ -24,9 +24,16 @@ export function RosterTable({ rows, mode, emptyText }: Props) {
       <tbody>
         {rows.map((row) => (
           <tr key={`${mode}-${row.employeeId}-${row.rawCode}-${row.leaveType ?? "none"}`}>
-            <td>{row.name}</td>
+            <td>
+              <span className="roster-name-cell">
+                <span>{row.name}</span>
+                {mode === "work" && row.specialDisplayTag ? (
+                  <span className={`roster-badge ${row.specialDisplayTag === "경조" ? "accent" : ""}`}>{row.specialDisplayTag === "교육" ? "교" : "경조"}</span>
+                ) : null}
+              </span>
+            </td>
             <td>{row.position || "-"}</td>
-            <td>{row.groupName || "-"}</td>
+            <td>{row.groupName || ""}</td>
             {mode === "off" ? <td>{row.leaveType ?? "-"}</td> : null}
           </tr>
         ))}

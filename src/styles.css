@@ -374,6 +374,14 @@ button.metric-card {
   letter-spacing: -0.05em;
 }
 
+.metric-value small {
+  margin-left: 6px;
+  font-size: 0.58em;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  color: #6f747c;
+}
+
 .metric-subtext,
 .metric-note {
   margin-top: auto;
@@ -395,6 +403,18 @@ button.metric-card {
   font-size: clamp(1.08rem, 2vw, 1.48rem);
   font-weight: 650;
   line-height: 1.5;
+  white-space: pre-line;
+}
+
+.metric-note-head {
+  font-size: 1em;
+  font-weight: 720;
+}
+
+.metric-note-line {
+  font-size: 0.82em;
+  font-weight: 600;
+  color: var(--ink-soft);
 }
 
 .status-banner {
@@ -465,6 +485,7 @@ button.metric-card {
 }
 
 .calendar-grid-shell {
+  position: relative;
   padding: 18px;
   border-radius: 30px;
   background: rgba(247, 242, 234, 0.9);
@@ -495,6 +516,31 @@ button.metric-card {
   gap: 14px;
 }
 
+.calendar-weekdays {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.calendar-weekdays span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.46);
+  color: #6e7279;
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.calendar-weekdays span.sunday {
+  color: #9a6f79;
+}
+
 .day-card {
   min-height: 178px;
   padding: 16px;
@@ -514,6 +560,15 @@ button.metric-card {
   background: #efebe3;
 }
 
+.day-card-empty {
+  min-height: 178px;
+  border-style: dashed;
+  border-color: rgba(49, 53, 60, 0.05);
+  background: rgba(249, 244, 236, 0.45);
+  box-shadow: none;
+  cursor: default;
+}
+
 .day-card.selected {
   border-color: rgba(143, 115, 92, 0.38);
   box-shadow:
@@ -528,6 +583,11 @@ button.metric-card {
 
 .day-card.special-day .day-number small {
   color: #988287;
+}
+
+.day-card.holiday {
+  border-color: rgba(170, 136, 99, 0.18);
+  background: #f8f1e6;
 }
 
 .day-number {
@@ -553,15 +613,32 @@ button.metric-card {
   font-weight: 560;
 }
 
+.day-badge,
+.detail-holiday-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(181, 146, 116, 0.14);
+  color: #8d6454;
+  font-size: 0.8rem;
+  font-weight: 680;
+  letter-spacing: 0.01em;
+}
+
 .day-note {
   margin-top: auto;
-  min-height: 3.1em;
+  min-height: 1.55em;
   padding-top: 10px;
   border-top: 1px dashed rgba(49, 53, 60, 0.12);
   font-size: 0.88rem;
   line-height: 1.45;
+  white-space: nowrap;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -609,10 +686,50 @@ button.metric-card {
   font-weight: 640;
 }
 
-.detail-note-box p {
-  margin: 0;
-  line-height: 1.55;
-  font-weight: 640;
+.detail-note-content {
+  display: grid;
+  gap: 6px;
+}
+
+.detail-note-head {
+  font-size: 1.02rem;
+  font-weight: 710;
+}
+
+.detail-note-line {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.roster-name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.roster-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: rgba(106, 142, 117, 0.16);
+  color: #4f6d57;
+  font-size: 0.78rem;
+  font-weight: 760;
+  line-height: 1;
+}
+
+.roster-badge.accent {
+  background: rgba(171, 123, 106, 0.16);
+  color: #8a5648;
+}
+
+.detail-holiday-badge {
+  margin-top: 12px;
 }
 
 .mini-metrics {
@@ -845,6 +962,10 @@ button.metric-card {
 
   .calendar-grid-shell {
     padding: 14px;
+  }
+
+  .calendar-weekdays {
+    gap: 10px;
   }
 
   .calendar-grid {

@@ -1,29 +1,96 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { HeaderNav } from "../components/HeaderNav";
 import { RosterTable } from "../components/RosterTable";
-import { formatDateLabel, formatMetric, formatWeekdayLabel, isSaturdayIso } from "../lib/date";
-import { getDaysForMonthFromData, getInitialMonthFromData, useScheduleData } from "../lib/schedule";
+import { formatDateLabel, formatMetric, formatWeekdayLabel, getWeekdayIndex, isSaturdayIso, toIsoDate } from "../lib/date";
+import { getDaysForMonthFromData, getInitialMonthFromData, isValidIsoDateInData, useScheduleData } from "../lib/schedule";
 import type { DaySummary } from "../types";
+
+const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
 function defaultDetailTab(day: DaySummary | null) {
   if (!day) return "off" as const;
   return isSaturdayIso(day.date) ? "work" : "off";
 }
 
+function getDetailMetrics(day: DaySummary | null) {
+  if (!day) {
+    return { actualWork: 0, off: 0, other: 0 };
+  }
+
+  let actualWork = 0;
+  let off = 0;
+  let other = 0;
+
+  for (const row of day.allEmployees) {
+    if (row.dutyKind === "TRAINING" || row.leaveType === "경조사") {
+      other += 1;
+      continue;
+    }
+
+    if (row.workWeight > 0) {
+      actualWork += 1;
+      continue;
+    }
+
+    if (row.offWeight > 0) {
+      off += 1;
+    }
+  }
+
+  return { actualWork, off, other };
+}
+
+function renderNoteLines(note: string) {
+  const lines = note ? note.split("\n").filter(Boolean) : [];
+  if (!lines.length) {
+    return "-";
+  }
+
+  return lines.map((line, index) => (
+    <div key={`${line}-${index}`} className={index === 0 ? "detail-note-head" : "detail-note-line"}>
+      {line}
+    </div>
+  ));
+}
+
 export function CalendarPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const schedule = useScheduleData();
   const initialMonth = getInitialMonthFromData(schedule);
-  const [activeMonth, setActiveMonth] = useState(initialMonth?.key ?? "");
+  const preferredDate = useMemo(() => {
+    const requestedDate = searchParams.get("date");
+    if (requestedDate && isValidIsoDateInData(schedule, requestedDate)) {
+      return requestedDate;
+    }
+
+    const today = toIsoDate(new Date());
+    if (isValidIsoDateInData(schedule, today)) {
+      return today;
+    }
+
+    return null;
+  }, [schedule, searchParams]);
+  const [activeMonth, setActiveMonth] = useState(preferredDate?.slice(0, 7) ?? initialMonth?.key ?? "");
 
   const days = useMemo(() => getDaysForMonthFromData(schedule, activeMonth), [activeMonth, schedule]);
-  const [selectedDate, setSelectedDate] = useState(days.find((day) => !day.isSundayClosed)?.date ?? days[0]?.date ?? "");
+  const calendarCells = useMemo(() => {
+    if (!days.length) return [];
+    const leadingEmpty = getWeekdayIndex(days[0].date);
+    const cells = [...Array.from({ length: leadingEmpty }, () => null), ...days];
+    const trailingEmpty = (7 - (cells.length % 7 || 7)) % 7;
+    return [...cells, ...Array.from({ length: trailingEmpty }, () => null)];
+  }, [days]);
+  const [selectedDate, setSelectedDate] = useState(
+    () => (preferredDate && preferredDate.startsWith(activeMonth) ? preferredDate : days.find((day) => !day.isSundayClosed)?.date ?? days[0]?.date ?? ""),
+  );
   const selectedDay =
     days.find((day) => day.date === selectedDate) ??
     days.find((day) => !day.isSundayClosed) ??
     days[0] ??
     null;
+  const detailMetrics = useMemo(() => getDetailMetrics(selectedDay), [selectedDay]);
   const [detailTab, setDetailTab] = useState<"work" | "off">(defaultDetailTab(selectedDay));
 
   useEffect(() => {
@@ -35,6 +102,12 @@ export function CalendarPage() {
       setActiveMonth(initialMonth?.key ?? "");
     }
   }, [activeMonth, initialMonth?.key, schedule.months]);
+
+  useEffect(() => {
+    if (!preferredDate) return;
+    setActiveMonth(preferredDate.slice(0, 7));
+    setSelectedDate(preferredDate);
+  }, [preferredDate]);
 
   useEffect(() => {
     if (!days.length) {
@@ -97,24 +170,35 @@ export function CalendarPage() {
         <div className="calendar-scroll">
           <div className="calendar-content">
             <div className="calendar-grid-shell">
-              <div className="calendar-grid">
-                {days.map((day) => (
-                  <button
-                    key={day.date}
-                    type="button"
-                    className={`day-card ${day.isSundayClosed ? "closed" : ""} ${day.isHoliday || day.isSundayClosed ? "special-day" : ""} ${
-                      selectedDay?.date === day.date ? "selected" : ""
-                    }`}
-                    onClick={() => setSelectedDate(day.date)}
-                  >
-                    <span className="day-number">
-                      {new Date(day.date).getDate()} <small>{formatWeekdayLabel(day.date)}</small>
-                    </span>
-                    <span className="day-meta">{day.isSundayClosed ? "센터 휴무" : `근무 ${day.workDisplayText}`}</span>
-                    {day.isSundayClosed ? null : <span className="day-meta">{`휴무 ${formatMetric(day.offCount)}`}</span>}
-                    <span className={`day-note ${day.remarks ? "" : "empty"}`}>{day.remarks || "\u00A0"}</span>
-                  </button>
+              <div className="calendar-weekdays" aria-hidden="true">
+                {WEEKDAY_LABELS.map((label, index) => (
+                  <span key={label} className={index === 0 ? "sunday" : ""}>
+                    {label}
+                  </span>
                 ))}
+              </div>
+              <div className="calendar-grid">
+                {calendarCells.map((day, index) =>
+                  day ? (
+                    <button
+                      key={day.date}
+                      type="button"
+                      className={`day-card ${day.isSundayClosed ? "closed" : ""} ${day.isHoliday || day.isSundayClosed ? "special-day" : ""} ${
+                        day.isHoliday ? "holiday" : ""
+                      } ${selectedDay?.date === day.date ? "selected" : ""}`}
+                      onClick={() => setSelectedDate(day.date)}
+                    >
+                      <span className="day-number">
+                        {new Date(day.date).getDate()} <small>{formatWeekdayLabel(day.date)}</small>
+                      </span>
+                      <span className="day-meta">{day.isSundayClosed ? "센터 휴무" : `근무 ${day.workDisplayText}`}</span>
+                      {day.isSundayClosed ? null : <span className="day-meta">{`휴무 ${formatMetric(day.offCount)}`}</span>}
+                      <span className={`day-note ${day.remarks ? "" : "empty"}`}>{day.remarks ? day.remarks.split("\n")[0] : "\u00A0"}</span>
+                    </button>
+                  ) : (
+                    <div key={`empty-${index}`} className="day-card day-card-empty" aria-hidden="true" />
+                  ),
+                )}
               </div>
             </div>
 
@@ -125,9 +209,12 @@ export function CalendarPage() {
                 <>
                   <p className="eyebrow">선택 날짜</p>
                   <h2>{formatDateLabel(selectedDay.date)}</h2>
+                  {selectedDay.isHoliday || selectedDay.isSundayClosed ? (
+                    <div className="detail-holiday-badge">{selectedDay.holidayName || "센터 휴무"}</div>
+                  ) : null}
                   <div className="detail-note-box">
                     <span>비고</span>
-                    <p>{selectedDay.remarks || "-"}</p>
+                    <div className="detail-note-content">{renderNoteLines(selectedDay.remarks)}</div>
                   </div>
 
                   {selectedDay.isSundayClosed ? (
@@ -139,15 +226,15 @@ export function CalendarPage() {
                     <div className="mini-metrics">
                       <div>
                         <span>실근무</span>
-                        <strong>{formatMetric(selectedDay.actualWorkCount)}</strong>
-                      </div>
-                      <div>
-                        <span>교육</span>
-                        <strong>{formatMetric(selectedDay.trainingCount)}</strong>
+                        <strong>{detailMetrics.actualWork}</strong>
                       </div>
                       <div>
                         <span>휴무</span>
-                        <strong>{formatMetric(selectedDay.offCount)}</strong>
+                        <strong>{detailMetrics.off}</strong>
+                      </div>
+                      <div>
+                        <span>기타</span>
+                        <strong>{detailMetrics.other}</strong>
                       </div>
                     </div>
                   )}

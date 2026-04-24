@@ -52,6 +52,10 @@ export function isSaturdayIso(iso: string) {
   return parseIsoDate(iso).getDay() === 6;
 }
 
+export function getWeekdayIndex(iso: string) {
+  return parseIsoDate(iso).getDay();
+}
+
 export function formatMetric(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
