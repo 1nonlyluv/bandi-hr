@@ -37,3 +37,4 @@ Thumbs.db
 
 # Project-local source data
 /*.xlsx
+!/26년 근무표.xlsx
