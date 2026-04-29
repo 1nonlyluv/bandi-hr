@@ -560,8 +560,8 @@ async function build() {
         offCount,
         workDisplayText:
           totalWorkEmployeeCount > actualWorkEmployeeCount
-            ? `${formatWeight(actualWorkEmployeeCount)}(${formatWeight(totalWorkEmployeeCount)})`
-            : formatWeight(actualWorkEmployeeCount),
+            ? `${formatWeight(actualWorkCount)}(${formatWeight(totalWorkEmployeeCount)})`
+            : formatWeight(actualWorkCount),
         kitchenDutyGroup: kitchenDutyGroup(date),
         holidayName,
         remarks,

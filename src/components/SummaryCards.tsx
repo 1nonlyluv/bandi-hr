@@ -1,3 +1,4 @@
+import { formatMetric } from "../lib/date";
 import type { DaySummary } from "../types";
 
 type Props = {
@@ -34,7 +35,7 @@ export function SummaryCards({ day, onOpenWorkDetails, onOpenOffDetails }: Props
         onClick={day.isSundayClosed ? undefined : onOpenOffDetails}
       >
         <div className="metric-label">휴무자</div>
-        <div className="metric-value">{day.isSundayClosed ? "-" : day.offEmployees.length}</div>
+        <div className="metric-value">{day.isSundayClosed ? "-" : formatMetric(day.offCount)}</div>
         <div className="metric-subtext">{day.isSundayClosed ? "센터 휴무" : "상세 보기"}</div>
       </button>
 

@@ -23,18 +23,22 @@ function getDetailMetrics(day: DaySummary | null) {
   let other = 0;
 
   for (const row of day.allEmployees) {
-    if (row.dutyKind === "TRAINING" || row.leaveType === "경조사") {
-      other += 1;
+    if (row.dutyKind === "TRAINING") {
+      other += row.trainingWeight;
+      continue;
+    }
+
+    if (row.leaveType === "경조사") {
+      other += row.offWeight || 1;
       continue;
     }
 
     if (row.workWeight > 0) {
-      actualWork += 1;
-      continue;
+      actualWork += row.workWeight;
     }
 
     if (row.offWeight > 0) {
-      off += 1;
+      off += row.offWeight;
     }
   }
 
@@ -146,7 +150,7 @@ export function CalendarPage() {
   };
 
   return (
-    <main className="page-shell">
+    <main className="page-shell calendar-shell">
       <HeaderNav hideNav />
 
       <section className="calendar-layout">
@@ -226,15 +230,15 @@ export function CalendarPage() {
                     <div className="mini-metrics">
                       <div>
                         <span>실근무</span>
-                        <strong>{detailMetrics.actualWork}</strong>
+                        <strong>{formatMetric(detailMetrics.actualWork)}</strong>
                       </div>
                       <div>
                         <span>휴무</span>
-                        <strong>{detailMetrics.off}</strong>
+                        <strong>{formatMetric(detailMetrics.off)}</strong>
                       </div>
                       <div>
                         <span>기타</span>
-                        <strong>{detailMetrics.other}</strong>
+                        <strong>{formatMetric(detailMetrics.other)}</strong>
                       </div>
                     </div>
                   )}

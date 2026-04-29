@@ -484,8 +484,8 @@ export function adminDraftToScheduleData(draft: AdminDraft): ScheduleData {
         offCount,
         workDisplayText:
           totalWorkEmployeeCount > actualWorkEmployeeCount
-            ? `${formatWeight(actualWorkEmployeeCount)}(${formatWeight(totalWorkEmployeeCount)})`
-            : formatWeight(actualWorkEmployeeCount),
+            ? `${formatWeight(actualWorkCount)}(${formatWeight(totalWorkEmployeeCount)})`
+            : formatWeight(actualWorkCount),
         kitchenDutyGroup: day.kitchenDutyGroup,
         holidayName,
         remarks,
