@@ -8,6 +8,10 @@
     "dev": "node scripts/dev-web.mjs",
     "build": "node scripts/build-schedule-data.mjs && tsc -b && vite build",
     "preview": "vite preview",
+    "publish:watch": "node scripts/watch-workbook-publish.mjs",
+    "publish:install": "node scripts/install-workbook-autopublish.mjs install",
+    "publish:uninstall": "node scripts/install-workbook-autopublish.mjs uninstall",
+    "publish:status": "node scripts/install-workbook-autopublish.mjs status",
     "desktop:dev": "bun run scripts/dev-desktop.mjs",
     "desktop:build": "bun run scripts/build-desktop.mjs"
   },

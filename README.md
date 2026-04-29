@@ -30,6 +30,44 @@ bun run generate:data
 
 즉 운영 방식은 `26년 근무표.xlsx`에 새 월 탭을 추가하거나 기존 탭 내용을 수정한 뒤 `main`에 푸시하면 된다.
 
+## 엑셀 저장 후 자동 푸시
+엑셀만 수정하고 나머지를 자동으로 처리하려면 아래 감시 스크립트를 실행해 둘 수 있다.
+
+```sh
+bun run publish:watch
+```
+
+이 스크립트는 `26년 근무표.xlsx` 저장을 감지하면 아래를 자동으로 수행한다.
+
+1. `schedule.json` 재생성
+2. `26년 근무표.xlsx` 와 `src/data/generated/schedule.json` 만 커밋
+3. `main` 브랜치로 자동 푸시
+
+주의:
+- `main` 브랜치에서만 동작한다.
+- 이미 다른 파일이 `staged` 상태면 자동 푸시를 멈춘다.
+- 이 스크립트가 켜져 있는 동안에는 엑셀 저장이 바로 공개 사이트 반영으로 이어질 수 있다.
+
+맥에서 로그인 후 자동 실행까지 붙이려면 아래를 한 번 실행하면 된다.
+
+```sh
+bun run publish:install
+```
+
+상태 확인:
+
+```sh
+bun run publish:status
+```
+
+제거:
+
+```sh
+bun run publish:uninstall
+```
+
+설치되면 `~/Library/LaunchAgents/com.bandi.hr.autopublish.plist` 로 등록되고, 이후에는 `26년 근무표.xlsx` 저장만으로 자동 커밋/푸시가 이어진다.
+
 ## 데스크톱 앱
 현재 데스크톱 빌드는 macOS 전용이며, 웹 앱을 로컬 `.app` 번들로 만든다.
 
