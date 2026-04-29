@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-24T04:17:13.433Z",
+  "generatedAt": "2026-04-29T03:59:37.514Z",
   "sourceFile": "26년 근무표.xlsx",
   "months": [
     {
@@ -215392,32 +215392,21 @@
       "date": "2026-04-28",
       "isSundayClosed": false,
       "isHoliday": false,
-      "actualWorkCount": 15,
+      "actualWorkCount": 14,
       "trainingCount": 0,
-      "offCount": 4,
-      "workDisplayText": "15",
+      "offCount": 5,
+      "workDisplayText": "14",
       "kitchenDutyGroup": "사랑반",
       "holidayName": "",
       "remarks": "주방 휴무",
-      "actualWorkEmployeeCount": 15,
-      "totalWorkEmployeeCount": 15,
+      "actualWorkEmployeeCount": 14,
+      "totalWorkEmployeeCount": 14,
       "workEmployees": [
         {
           "employeeId": "최재영|대표",
           "name": "최재영",
           "position": "대표",
           "groupName": "대표",
-          "dutyKind": "WORK",
-          "rawCode": "D",
-          "workWeight": 1,
-          "offWeight": 0,
-          "trainingWeight": 0
-        },
-        {
-          "employeeId": "장미란|시설장",
-          "name": "장미란",
-          "position": "시설장",
-          "groupName": "운영지원팀",
           "dutyKind": "WORK",
           "rawCode": "D",
           "workWeight": 1,
@@ -215570,6 +215559,18 @@
       ],
       "offEmployees": [
         {
+          "employeeId": "장미란|시설장",
+          "name": "장미란",
+          "position": "시설장",
+          "groupName": "운영지원팀",
+          "dutyKind": "OFF",
+          "leaveType": "연차",
+          "rawCode": "▲",
+          "workWeight": 0,
+          "offWeight": 1,
+          "trainingWeight": 0
+        },
+        {
           "employeeId": "변해미|사회복지사",
           "name": "변해미",
           "position": "사회복지사",
@@ -215635,10 +215636,11 @@
           "name": "장미란",
           "position": "시설장",
           "groupName": "운영지원팀",
-          "dutyKind": "WORK",
-          "rawCode": "D",
-          "workWeight": 1,
-          "offWeight": 0,
+          "dutyKind": "OFF",
+          "leaveType": "연차",
+          "rawCode": "▲",
+          "workWeight": 0,
+          "offWeight": 1,
           "trainingWeight": 0
         },
         {
@@ -215838,9 +215840,9 @@
       "date": "2026-04-29",
       "isSundayClosed": false,
       "isHoliday": false,
-      "actualWorkCount": 18,
+      "actualWorkCount": 17.5,
       "trainingCount": 0,
-      "offCount": 1,
+      "offCount": 1.5,
       "workDisplayText": "18",
       "kitchenDutyGroup": "사랑반",
       "holidayName": "",
@@ -215941,10 +215943,11 @@
           "name": "김영숙",
           "position": "요양보호사",
           "groupName": "사랑반",
-          "dutyKind": "WORK",
-          "rawCode": "D",
-          "workWeight": 1,
-          "offWeight": 0,
+          "dutyKind": "OFF",
+          "leaveType": "오후반차",
+          "rawCode": "D●",
+          "workWeight": 0.5,
+          "offWeight": 0.5,
           "trainingWeight": 0
         },
         {
@@ -216048,6 +216051,18 @@
         }
       ],
       "offEmployees": [
+        {
+          "employeeId": "김영숙|요양보호사",
+          "name": "김영숙",
+          "position": "요양보호사",
+          "groupName": "사랑반",
+          "dutyKind": "OFF",
+          "leaveType": "오후반차",
+          "rawCode": "D●",
+          "workWeight": 0.5,
+          "offWeight": 0.5,
+          "trainingWeight": 0
+        },
         {
           "employeeId": "박정희|요양보호사",
           "name": "박정희",
@@ -216155,10 +216170,11 @@
           "name": "김영숙",
           "position": "요양보호사",
           "groupName": "사랑반",
-          "dutyKind": "WORK",
-          "rawCode": "D",
-          "workWeight": 1,
-          "offWeight": 0,
+          "dutyKind": "OFF",
+          "leaveType": "오후반차",
+          "rawCode": "D●",
+          "workWeight": 0.5,
+          "offWeight": 0.5,
           "trainingWeight": 0
         },
         {
