@@ -104,7 +104,7 @@ select {
 }
 
 .calendar-shell {
-  --calendar-frame-width: 1240px;
+  --calendar-frame-width: 1224px;
 }
 
 .calendar-shell .site-header,
@@ -491,7 +491,8 @@ button.metric-card {
   display: grid;
   grid-template-columns: minmax(860px, 1.62fr) minmax(340px, 0.9fr);
   gap: 24px;
-  min-width: 1240px;
+  width: var(--calendar-frame-width);
+  min-width: var(--calendar-frame-width);
   align-items: start;
 }
 
@@ -879,7 +880,7 @@ button.metric-card {
 
 @media (max-width: 900px) {
   .calendar-shell {
-    --calendar-frame-width: 100%;
+    --calendar-frame-width: 980px;
   }
 
   .page-shell {
@@ -984,7 +985,6 @@ button.metric-card {
   }
 
   .calendar-content {
-    min-width: 980px;
     grid-template-columns: minmax(640px, 1.5fr) minmax(300px, 0.84fr);
     gap: 20px;
   }
@@ -1039,6 +1039,10 @@ button.metric-card {
 }
 
 @media (max-width: 720px) {
+  .calendar-shell {
+    --calendar-frame-width: 760px;
+  }
+
   .page-shell {
     padding: 16px 12px 30px;
   }
@@ -1177,7 +1181,6 @@ button.metric-card {
   }
 
   .calendar-content {
-    min-width: 760px;
     grid-template-columns: minmax(470px, 1.42fr) minmax(250px, 0.82fr);
     gap: 14px;
   }
@@ -1310,6 +1313,10 @@ button.metric-card {
 }
 
 @media (max-width: 480px) {
+  .calendar-shell {
+    --calendar-frame-width: 680px;
+  }
+
   .page-shell {
     padding: 14px 10px 24px;
   }
@@ -1345,7 +1352,6 @@ button.metric-card {
   }
 
   .calendar-content {
-    min-width: 680px;
     grid-template-columns: minmax(420px, 1.38fr) minmax(220px, 0.8fr);
     gap: 12px;
   }
