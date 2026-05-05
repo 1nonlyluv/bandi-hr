@@ -103,14 +103,16 @@ select {
   padding: 28px 22px 56px;
 }
 
+.summary-shell,
 .calendar-shell {
-  --calendar-frame-width: 1224px;
+  --app-frame-width: 1224px;
 }
 
+.summary-shell .site-header,
+.summary-shell .hero,
 .calendar-shell .site-header,
-.calendar-shell .calendar-header,
-.calendar-shell .calendar-scroll {
-  width: min(100%, var(--calendar-frame-width));
+.calendar-shell .calendar-layout {
+  width: min(100%, var(--app-frame-width));
   margin-inline: auto;
 }
 
@@ -491,8 +493,8 @@ button.metric-card {
   display: grid;
   grid-template-columns: minmax(860px, 1.62fr) minmax(340px, 0.9fr);
   gap: 24px;
-  width: var(--calendar-frame-width);
-  min-width: var(--calendar-frame-width);
+  width: 100%;
+  min-width: 0;
   align-items: start;
 }
 
@@ -574,11 +576,11 @@ button.metric-card {
 
 .day-card-empty {
   min-height: 178px;
-  border-style: dashed;
-  border-color: rgba(49, 53, 60, 0.05);
-  background: rgba(249, 244, 236, 0.45);
+  border-color: transparent;
+  background: transparent;
   box-shadow: none;
   cursor: default;
+  pointer-events: none;
 }
 
 .day-card.selected {
@@ -879,8 +881,9 @@ button.metric-card {
 }
 
 @media (max-width: 900px) {
+  .summary-shell,
   .calendar-shell {
-    --calendar-frame-width: 980px;
+    --app-frame-width: 100%;
   }
 
   .page-shell {
@@ -985,6 +988,7 @@ button.metric-card {
   }
 
   .calendar-content {
+    min-width: 980px;
     grid-template-columns: minmax(640px, 1.5fr) minmax(300px, 0.84fr);
     gap: 20px;
   }
@@ -1039,10 +1043,6 @@ button.metric-card {
 }
 
 @media (max-width: 720px) {
-  .calendar-shell {
-    --calendar-frame-width: 760px;
-  }
-
   .page-shell {
     padding: 16px 12px 30px;
   }
@@ -1181,6 +1181,7 @@ button.metric-card {
   }
 
   .calendar-content {
+    min-width: 760px;
     grid-template-columns: minmax(470px, 1.42fr) minmax(250px, 0.82fr);
     gap: 14px;
   }
@@ -1313,10 +1314,6 @@ button.metric-card {
 }
 
 @media (max-width: 480px) {
-  .calendar-shell {
-    --calendar-frame-width: 680px;
-  }
-
   .page-shell {
     padding: 14px 10px 24px;
   }
@@ -1352,6 +1349,7 @@ button.metric-card {
   }
 
   .calendar-content {
+    min-width: 680px;
     grid-template-columns: minmax(420px, 1.38fr) minmax(220px, 0.8fr);
     gap: 12px;
   }
