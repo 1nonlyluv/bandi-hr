@@ -61,7 +61,7 @@ function renderNoteLines(note: string) {
 export function CalendarPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [isMobileLandscape, setIsMobileLandscape] = useState(false);
+  const [isMobileCompact, setIsMobileCompact] = useState(false);
   const schedule = useScheduleData();
   const initialMonth = getInitialMonthFromData(schedule);
   const preferredDate = useMemo(() => {
@@ -130,9 +130,9 @@ export function CalendarPage() {
       return;
     }
 
-    const mediaQuery = window.matchMedia("(max-width: 900px) and (orientation: landscape)");
+    const mediaQuery = window.matchMedia("(max-width: 900px)");
     const update = () => {
-      setIsMobileLandscape(mediaQuery.matches);
+      setIsMobileCompact(mediaQuery.matches);
     };
 
     update();
@@ -172,7 +172,7 @@ export function CalendarPage() {
     <main className="page-shell calendar-shell">
       <HeaderNav hideNav />
 
-      <section className={`calendar-layout ${isMobileLandscape ? "mobile-landscape" : ""}`}>
+      <section className={`calendar-layout ${isMobileCompact ? "mobile-compact" : ""}`}>
         <div className="calendar-header">
           <div>
             <p className="eyebrow">월별 근무 캘린더</p>
@@ -210,7 +210,7 @@ export function CalendarPage() {
                         day.isHoliday ? "holiday" : ""
                       } ${selectedDay?.date === day.date ? "selected" : ""}`}
                       onClick={() => {
-                        if (isMobileLandscape) {
+                        if (isMobileCompact) {
                           navigate(`/date/${day.date}`);
                           return;
                         }

@@ -670,12 +670,12 @@ button.metric-card {
   background: rgba(248, 243, 235, 0.92);
 }
 
-.calendar-layout.mobile-landscape .calendar-content {
+.calendar-layout.mobile-compact .calendar-content {
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
 }
 
-.calendar-layout.mobile-landscape .calendar-detail {
+.calendar-layout.mobile-compact .calendar-detail {
   display: none;
 }
 
@@ -1051,16 +1051,16 @@ button.metric-card {
   }
 }
 
-@media (max-width: 900px) and (orientation: landscape) {
-  .calendar-layout.mobile-landscape .calendar-scroll {
+@media (max-width: 900px) {
+  .calendar-layout.mobile-compact .calendar-scroll {
     overflow-x: visible;
   }
 
-  .calendar-layout.mobile-landscape .calendar-content {
+  .calendar-layout.mobile-compact .calendar-content {
     width: 100%;
   }
 
-  .calendar-layout.mobile-landscape .calendar-grid-shell {
+  .calendar-layout.mobile-compact .calendar-grid-shell {
     padding: 14px;
   }
 }
