@@ -102,7 +102,7 @@ async function publishWorkbookUpdate() {
     throw new Error("There are already staged changes. Please commit or unstage them before auto publish.");
   }
 
-  await run("node", ["scripts/build-schedule-data.mjs"]);
+  await run(process.execPath, ["scripts/build-schedule-data.mjs"]);
 
   const watchedChanges = await getWatchedChanges();
   if (!watchedChanges.length) {
