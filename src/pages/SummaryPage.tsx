@@ -19,7 +19,7 @@ export function SummaryPage({ day }: Props) {
 
   if (!day) {
     return (
-      <main className="page-shell">
+      <main className="page-shell summary-shell">
         <HeaderNav hideNav />
         <section className="empty-state">
           <h1>데이터 없음</h1>
@@ -33,7 +33,7 @@ export function SummaryPage({ day }: Props) {
   const nextDate = shiftIsoDate(day.date, 1);
 
   return (
-    <main className="page-shell">
+    <main className="page-shell summary-shell">
       <HeaderNav hideNav />
 
       <section className="hero">
