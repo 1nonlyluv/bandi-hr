@@ -104,7 +104,7 @@ select {
 }
 
 .calendar-shell {
-  --calendar-frame-width: 1288px;
+  --calendar-frame-width: 1240px;
 }
 
 .calendar-shell .site-header,
