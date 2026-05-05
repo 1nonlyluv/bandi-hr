@@ -61,6 +61,7 @@ function renderNoteLines(note: string) {
 export function CalendarPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [isMobileLandscape, setIsMobileLandscape] = useState(false);
   const schedule = useScheduleData();
   const initialMonth = getInitialMonthFromData(schedule);
   const preferredDate = useMemo(() => {
@@ -125,6 +126,24 @@ export function CalendarPage() {
   }, [days, selectedDate]);
 
   useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(max-width: 900px) and (orientation: landscape)");
+    const update = () => {
+      setIsMobileLandscape(mediaQuery.matches);
+    };
+
+    update();
+    mediaQuery.addEventListener("change", update);
+
+    return () => {
+      mediaQuery.removeEventListener("change", update);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleMouseNavigation = (event: MouseEvent) => {
       if (event.button === 3 && window.history.length > 1) {
         event.preventDefault();
@@ -153,7 +172,7 @@ export function CalendarPage() {
     <main className="page-shell calendar-shell">
       <HeaderNav hideNav />
 
-      <section className="calendar-layout">
+      <section className={`calendar-layout ${isMobileLandscape ? "mobile-landscape" : ""}`}>
         <div className="calendar-header">
           <div>
             <p className="eyebrow">월별 근무 캘린더</p>
@@ -190,7 +209,14 @@ export function CalendarPage() {
                       className={`day-card ${day.isSundayClosed ? "closed" : ""} ${day.isHoliday || day.isSundayClosed ? "special-day" : ""} ${
                         day.isHoliday ? "holiday" : ""
                       } ${selectedDay?.date === day.date ? "selected" : ""}`}
-                      onClick={() => setSelectedDate(day.date)}
+                      onClick={() => {
+                        if (isMobileLandscape) {
+                          navigate(`/date/${day.date}`);
+                          return;
+                        }
+
+                        setSelectedDate(day.date);
+                      }}
                     >
                       <span className="day-number">
                         {new Date(day.date).getDate()} <small>{formatWeekdayLabel(day.date)}</small>

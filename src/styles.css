@@ -670,6 +670,15 @@ button.metric-card {
   background: rgba(248, 243, 235, 0.92);
 }
 
+.calendar-layout.mobile-landscape .calendar-content {
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+
+.calendar-layout.mobile-landscape .calendar-detail {
+  display: none;
+}
+
 .calendar-detail > * {
   position: relative;
   z-index: 1;
@@ -1039,6 +1048,20 @@ button.metric-card {
   .off-table td {
     padding: 10px 8px;
     font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+  .calendar-layout.mobile-landscape .calendar-scroll {
+    overflow-x: visible;
+  }
+
+  .calendar-layout.mobile-landscape .calendar-content {
+    width: 100%;
+  }
+
+  .calendar-layout.mobile-landscape .calendar-grid-shell {
+    padding: 14px;
   }
 }
 
