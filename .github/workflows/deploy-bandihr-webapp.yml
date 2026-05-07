@@ -1,4 +1,5 @@
 name: Deploy BandiHR Webapp
+# Dedicated Pages deploy for the BandiHR app in this repository.
 
 "on":
   push:
