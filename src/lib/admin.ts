@@ -510,6 +510,7 @@ export function adminDraftToScheduleData(draft: AdminDraft): ScheduleData {
 
   return {
     generatedAt: draft.lastUpdatedAt,
+    sourceGeneratedAt: draft.sourceGeneratedAt,
     sourceFile: draft.sourceFile,
     months,
     days,

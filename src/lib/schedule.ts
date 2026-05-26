@@ -6,8 +6,36 @@ import { parseIsoDate, toIsoDate } from "./date";
 
 const bundledData = rawData as ScheduleData;
 
+function toGeneratedTimestamp(value?: string) {
+  if (!value) return Number.NEGATIVE_INFINITY;
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp;
+}
+
+function getSourceTimestamp(data: ScheduleData, fallbackToGeneratedAt = false) {
+  return toGeneratedTimestamp(data.sourceGeneratedAt ?? (fallbackToGeneratedAt ? data.generatedAt : undefined));
+}
+
+function shouldUseOverrideData(overrideData: ScheduleData | null, baseData: ScheduleData) {
+  if (!overrideData) return false;
+  if (overrideData.sourceFile !== baseData.sourceFile) return false;
+
+  const overrideSourceTimestamp = getSourceTimestamp(overrideData);
+  const baseSourceTimestamp = getSourceTimestamp(baseData, true);
+
+  if (overrideSourceTimestamp === Number.NEGATIVE_INFINITY) {
+    return false;
+  }
+
+  return overrideSourceTimestamp >= baseSourceTimestamp;
+}
+
 function getActiveData() {
-  return loadPublishedViewerOverride() ?? bundledData;
+  const overrideData = loadPublishedViewerOverride();
+  if (overrideData && shouldUseOverrideData(overrideData, bundledData)) {
+    return overrideData;
+  }
+  return bundledData;
 }
 
 function getDayMap(data: ScheduleData) {

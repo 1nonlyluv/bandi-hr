@@ -52,6 +52,7 @@ export type MonthSummary = {
 
 export type ScheduleData = {
   generatedAt: string;
+  sourceGeneratedAt?: string;
   sourceFile: string;
   months: MonthSummary[];
   days: DaySummary[];

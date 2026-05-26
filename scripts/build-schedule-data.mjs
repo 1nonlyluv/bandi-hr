@@ -585,6 +585,7 @@ async function build() {
 
   const payload = {
     generatedAt: workbookStats.mtime.toISOString(),
+    sourceGeneratedAt: workbookStats.mtime.toISOString(),
     sourceFile: path.basename(workbookPath),
     months,
     days,
