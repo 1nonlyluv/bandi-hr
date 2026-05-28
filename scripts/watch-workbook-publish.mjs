@@ -1,4 +1,6 @@
 import fs from "node:fs";
+import fsp from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { ROOT_DIR } from "./desktop-common.mjs";
@@ -20,7 +22,7 @@ function timestampLabel() {
 function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
-      cwd: ROOT_DIR,
+      cwd: options.cwd ?? ROOT_DIR,
       stdio: "inherit",
       ...options,
     });
@@ -42,10 +44,10 @@ function run(command, args, options = {}) {
   });
 }
 
-function runCapture(command, args) {
+function runCapture(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
-      cwd: ROOT_DIR,
+      cwd: options.cwd ?? ROOT_DIR,
       stdio: ["ignore", "pipe", "pipe"],
     });
 
@@ -81,13 +83,37 @@ async function getCurrentBranch() {
   return runCapture("git", ["rev-parse", "--abbrev-ref", "HEAD"]);
 }
 
-async function getStagedChanges() {
-  const output = await runCapture("git", ["diff", "--cached", "--name-only"]);
+async function getWatchedChanges() {
+  const output = await runCapture("git", ["status", "--short", "--", ...WATCHED_PATHS]);
   return output ? output.split("\n").map((line) => line.trim()).filter(Boolean) : [];
 }
 
-async function getWatchedChanges() {
-  const output = await runCapture("git", ["status", "--short", "--", ...WATCHED_PATHS]);
+async function createPublishWorktree() {
+  const tempDir = path.join(os.tmpdir(), `bandihr-autopublish-${process.pid}-${Date.now()}`);
+  await run("git", ["fetch", "origin", "main"]);
+  await run("git", ["worktree", "add", "--detach", tempDir, "origin/main"]);
+  return tempDir;
+}
+
+async function removePublishWorktree(tempDir) {
+  await run("git", ["worktree", "remove", "--force", tempDir]).catch((error) => {
+    console.warn(`[auto-publish] Failed to remove temp worktree ${tempDir}`);
+    console.warn(error instanceof Error ? error.message : error);
+  });
+  await fsp.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+}
+
+async function copyWatchedFiles(targetDir) {
+  for (const relativePath of WATCHED_PATHS) {
+    const sourcePath = path.join(ROOT_DIR, relativePath);
+    const targetPath = path.join(targetDir, relativePath);
+    await fsp.mkdir(path.dirname(targetPath), { recursive: true });
+    await fsp.copyFile(sourcePath, targetPath);
+  }
+}
+
+async function getWorktreeWatchedChanges(targetDir) {
+  const output = await runCapture("git", ["status", "--short", "--", ...WATCHED_PATHS], { cwd: targetDir });
   return output ? output.split("\n").map((line) => line.trim()).filter(Boolean) : [];
 }
 
@@ -95,11 +121,6 @@ async function publishWorkbookUpdate() {
   const branch = await getCurrentBranch();
   if (branch !== "main") {
     throw new Error(`Auto publish is only allowed on main. Current branch: ${branch}`);
-  }
-
-  const stagedChanges = await getStagedChanges();
-  if (stagedChanges.length) {
-    throw new Error("There are already staged changes. Please commit or unstage them before auto publish.");
   }
 
   await run(process.execPath, ["scripts/build-schedule-data.mjs"]);
@@ -110,9 +131,23 @@ async function publishWorkbookUpdate() {
     return;
   }
 
-  await run("git", ["add", "--", ...WATCHED_PATHS]);
-  await run("git", ["commit", "-m", `Auto update workbook ${timestampLabel()}`]);
-  await run("git", ["push", "origin", "main"]);
+  const publishDir = await createPublishWorktree();
+
+  try {
+    await copyWatchedFiles(publishDir);
+
+    const worktreeChanges = await getWorktreeWatchedChanges(publishDir);
+    if (!worktreeChanges.length) {
+      console.log("[auto-publish] No remote-facing workbook changes to publish.");
+      return;
+    }
+
+    await run("git", ["add", "--", ...WATCHED_PATHS], { cwd: publishDir });
+    await run("git", ["commit", "-m", `Auto update workbook ${timestampLabel()}`], { cwd: publishDir });
+    await run("git", ["push", "origin", "HEAD:main"], { cwd: publishDir });
+  } finally {
+    await removePublishWorktree(publishDir);
+  }
 }
 
 async function main() {
