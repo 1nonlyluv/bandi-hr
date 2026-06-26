@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-17T02:26:06.188Z",
-  "sourceGeneratedAt": "2026-06-17T02:26:06.188Z",
+  "generatedAt": "2026-06-26T01:35:29.325Z",
+  "sourceGeneratedAt": "2026-06-26T01:35:29.325Z",
   "sourceFile": "26년 근무표.xlsx",
   "months": [
     {
@@ -237605,15 +237605,15 @@
       "date": "2026-06-24",
       "isSundayClosed": false,
       "isHoliday": false,
-      "actualWorkCount": 16.5,
+      "actualWorkCount": 15.5,
       "trainingCount": 0,
-      "offCount": 2.5,
-      "workDisplayText": "16.5",
+      "offCount": 3.5,
+      "workDisplayText": "15.5",
       "kitchenDutyGroup": "믿음반",
       "holidayName": "",
       "remarks": "",
-      "actualWorkEmployeeCount": 17,
-      "totalWorkEmployeeCount": 17,
+      "actualWorkEmployeeCount": 16,
+      "totalWorkEmployeeCount": 16,
       "workEmployees": [
         {
           "employeeId": "최재영|대표",
@@ -237630,17 +237630,6 @@
           "employeeId": "장미란|시설장",
           "name": "장미란",
           "position": "시설장",
-          "groupName": "운영지원팀",
-          "dutyKind": "WORK",
-          "rawCode": "D",
-          "workWeight": 1,
-          "offWeight": 0,
-          "trainingWeight": 0
-        },
-        {
-          "employeeId": "강선진|사회복지사",
-          "name": "강선진",
-          "position": "사회복지사",
           "groupName": "운영지원팀",
           "dutyKind": "WORK",
           "rawCode": "D",
@@ -237818,6 +237807,18 @@
           "trainingWeight": 0
         },
         {
+          "employeeId": "강선진|사회복지사",
+          "name": "강선진",
+          "position": "사회복지사",
+          "groupName": "운영지원팀",
+          "dutyKind": "OFF",
+          "leaveType": "연차",
+          "rawCode": "▲",
+          "workWeight": 0,
+          "offWeight": 1,
+          "trainingWeight": 0
+        },
+        {
           "employeeId": "임경호|요양보호사",
           "name": "임경호",
           "position": "요양보호사",
@@ -237882,10 +237883,11 @@
           "name": "강선진",
           "position": "사회복지사",
           "groupName": "운영지원팀",
-          "dutyKind": "WORK",
-          "rawCode": "D",
-          "workWeight": 1,
-          "offWeight": 0,
+          "dutyKind": "OFF",
+          "leaveType": "연차",
+          "rawCode": "▲",
+          "workWeight": 0,
+          "offWeight": 1,
           "trainingWeight": 0
         },
         {
