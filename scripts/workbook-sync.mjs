@@ -66,17 +66,20 @@ export async function syncOnce(config) {
   try {
     state = await readState(stateFile);
     state.checkedAt = now();
-    const first = await fs.readFile(config.source);
+    job = await fs.mkdtemp(path.join(config.runtime, "job-"));
+    const snapshot = path.join(job, "snapshot.xlsx");
+    // macOS copyfile handles iCloud hydration; Node reads only the local snapshot.
+    await command("/bin/cp", ["-p", config.source, snapshot], job);
+    const first = await fs.readFile(snapshot);
     if (first.length === 0) throw new Error("Workbook is empty; waiting for the next saved copy.");
     const firstHash = hash(first);
     await wait(config.settleMs ?? 2000);
-    const bytes = await fs.readFile(config.source);
+    const secondSnapshot = path.join(job, "second.xlsx");
+    await command("/bin/cp", ["-p", config.source, secondSnapshot], job);
+    const bytes = await fs.readFile(secondSnapshot);
     if (hash(bytes) !== firstHash) throw new Error("Workbook is still being saved; retrying next minute.");
     state.sourceHash = firstHash;
     if (state.publishedHash !== firstHash) {
-      job = await fs.mkdtemp(path.join(config.runtime, "job-"));
-      const snapshot = path.join(job, "snapshot.xlsx");
-      await fs.writeFile(snapshot, bytes);
       await command("/usr/bin/unzip", ["-tqq", snapshot], job);
       const workbookXml = await command("/usr/bin/unzip", ["-p", snapshot, "xl/workbook.xml"], job);
       if (!/\d{2}년\s*\d{1,2}월/.test(workbookXml)) throw new Error("No monthly schedule sheets found in workbook.");

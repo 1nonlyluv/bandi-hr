@@ -39,5 +39,22 @@ test("sync retries unchanged saves after failure and publishes only the workbook
     assert.equal(cmd(remote, "git", "rev-parse", "main"), retried.commit, "invalid file must not publish");
     await fs.mkdir(path.join(config.runtime, "lock"));
     assert.equal((await syncOnce(config)).status, "busy");
+    await fs.rm(path.join(config.runtime, "lock"), { recursive: true });
+    await fs.copyFile(path.join(seed, "schedule.xlsx"), source);
+    const realFetch = globalThis.fetch;
+    try {
+      let liveHash = "stale";
+      globalThis.fetch = async (url) => new Response(JSON.stringify(String(url).includes("api.github.com")
+        ? { workflow_runs: [{ path: ".github/workflows/deploy-bandihr-webapp.yml", status: "completed", conclusion: "success" }] }
+        : { workbookSha256: liveHash }), { status: 200 });
+      const monitored = { ...config, monitorDeployment: true, site: "https://example.test/" };
+      await assert.rejects(syncOnce(monitored), /different workbook/);
+      liveHash = retried.publishedHash;
+      const deployed = await syncOnce(monitored);
+      assert.equal(deployed.status, "current");
+      assert.equal(deployed.deployedHash, retried.publishedHash);
+      assert.equal(deployed.failureCount, 0);
+      assert.equal(deployed.error, undefined);
+    } finally { globalThis.fetch = realFetch; }
   } finally { await fs.rm(root, { recursive: true, force: true }); }
 });
