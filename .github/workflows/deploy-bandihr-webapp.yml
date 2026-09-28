@@ -50,7 +50,9 @@ jobs:
         run: npm ci
 
       - name: Build schedule data and web app
-        run: npm run build
+        run: |
+          npm run build
+          node scripts/write-deployment-version.mjs
 
       - name: Add GitHub Pages fallback
         run: cp dist/index.html dist/404.html
