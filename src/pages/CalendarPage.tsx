@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useToday } from "../hooks/useToday";
 import { HeaderNav } from "../components/HeaderNav";
 import { RosterTable } from "../components/RosterTable";
-import { formatDateLabel, formatMetric, formatWeekdayLabel, getWeekdayIndex, isSaturdayIso, toIsoDate } from "../lib/date";
+import { formatDateLabel, formatMetric, formatWeekdayLabel, getWeekdayIndex, isSaturdayIso } from "../lib/date";
 import { getDaysForMonthFromData, getInitialMonthFromData, isValidIsoDateInData, useScheduleData } from "../lib/schedule";
 import type { DaySummary } from "../types";
 
@@ -60,6 +61,7 @@ function renderNoteLines(note: string) {
 
 export function CalendarPage() {
   const navigate = useNavigate();
+  const today = useToday();
   const [searchParams] = useSearchParams();
   const [isMobileCompact, setIsMobileCompact] = useState(false);
   const schedule = useScheduleData();
@@ -70,13 +72,12 @@ export function CalendarPage() {
       return requestedDate;
     }
 
-    const today = toIsoDate(new Date());
     if (isValidIsoDateInData(schedule, today)) {
       return today;
     }
 
     return null;
-  }, [schedule, searchParams]);
+  }, [schedule, searchParams, today]);
   const [activeMonth, setActiveMonth] = useState(preferredDate?.slice(0, 7) ?? initialMonth?.key ?? "");
 
   const days = useMemo(() => getDaysForMonthFromData(schedule, activeMonth), [activeMonth, schedule]);
