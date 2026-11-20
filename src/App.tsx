@@ -1,4 +1,5 @@
 import { HashRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
+import { useTodayRoute } from "./hooks/useTodayRoute";
 import { useToday } from "./hooks/useToday";
 import { shiftIsoDate } from "./lib/date";
 import { CalendarPage } from "./pages/CalendarPage";
@@ -15,6 +16,7 @@ function DateRoutePage() {
 
 function AppRoutes() {
   const today = useToday();
+  useTodayRoute(today);
   const schedule = useScheduleData();
 
   return (
