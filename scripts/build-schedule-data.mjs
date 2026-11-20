@@ -1,3 +1,4 @@
+import caregiverGroups from "../src/data/caregiver-groups.json" with { type: "json" };
 import Workbook from "exceljs/lib/doc/workbook.js";
 import fs from "node:fs/promises";
 import os from "node:os";
@@ -14,11 +15,7 @@ const FIXED_HOLIDAYS = officialHolidayData.fixedHolidays;
 const DATED_HOLIDAYS = officialHolidayData.datedHolidays;
 const WANTED_OFF_FILL = "FFDAEEF3";
 const MEETING_OVERRIDE_DATE = "2026-03-03";
-const GROUP_RULES = [
-  { start: 14, end: 17, name: "사랑반" },
-  { start: 18, end: 20, name: "믿음반" },
-  { start: 21, end: 24, name: "소망반" },
-];
+
 const KITCHEN_GROUPS = ["소망반", "믿음반", "사랑반"];
 const KITCHEN_ANCHOR = new Date("2026-03-01T00:00:00+09:00");
 const KITCHEN_TEACHER_NAME = "김계순";
@@ -98,13 +95,12 @@ function kitchenDutyGroup(date) {
   return KITCHEN_GROUPS[((weekOffset % KITCHEN_GROUPS.length) + KITCHEN_GROUPS.length) % KITCHEN_GROUPS.length];
 }
 
-function groupNameFor(position, row) {
+function groupNameFor(position, name) {
   if (position === "대표") return "대표";
   if (["시설장", "사무원", "사회복지사", "간호조무사"].includes(position)) return "운영지원팀";
   if (position === "조리원") return "";
-  const matched = GROUP_RULES.find((rule) => row >= rule.start && row <= rule.end);
   if (position === "요양보호사" || position === "요양팀장") {
-    return matched?.name ?? "";
+    return caregiverGroups[name]?.groupName ?? "";
   }
   return "";
 }
@@ -245,7 +241,7 @@ function mergeRemarkParts(parts) {
 }
 
 function formatEmployeeNoteLine(row) {
-  return row.groupName ? `${row.name} (${row.groupName})` : row.name;
+  return row.groupName ? `${row.name} (${row.groupName})${row.isSenior ? " (선임)" : ""}` : row.name;
 }
 
 function buildSpecialNoteLines(label, rows, fallbackCount = 0) {
@@ -468,7 +464,8 @@ async function build() {
         employeeId: `${name}|${cellText(worksheet, `E${row}`)}`,
         name,
         position: cellText(worksheet, `E${row}`),
-        groupName: groupNameFor(cellText(worksheet, `E${row}`), row),
+        groupName: groupNameFor(cellText(worksheet, `E${row}`), name),
+        isSenior: ["요양보호사", "요양팀장"].includes(cellText(worksheet, `E${row}`)) && (caregiverGroups[name]?.isSenior ?? false),
       });
     }
 
@@ -522,6 +519,7 @@ async function build() {
           name: employee.name,
           position: employee.position,
           groupName: employee.groupName,
+          isSenior: employee.isSenior,
           dutyKind: record.dutyKind,
           leaveType: record.leaveType,
           rawCode,

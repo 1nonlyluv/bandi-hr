@@ -25,6 +25,7 @@ export type AdminEmployee = {
   name: string;
   position: string;
   groupName: string;
+  isSenior?: boolean;
   sortOrder: number;
   isActive: boolean;
   specialRole: AdminSpecialRole;
@@ -97,6 +98,7 @@ function dedupeEmployees(schedule: ScheduleData) {
         name: employee.name,
         position: employee.position,
         groupName: employee.groupName,
+    isSenior: employee.isSenior,
         sortOrder: employeeMap.size + 1,
         isActive: true,
         specialRole: employee.name === "김계순" ? "KITCHEN_TEACHER" : "",
@@ -369,6 +371,7 @@ function assignmentToRecord(employee: AdminEmployee, assignment: AdminAssignment
     name: employee.name,
     position: employee.position,
     groupName: employee.groupName,
+    isSenior: employee.isSenior,
     specialDisplayTag: undefined,
   };
 

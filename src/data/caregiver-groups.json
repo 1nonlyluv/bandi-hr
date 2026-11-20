@@ -1,0 +1,46 @@
+{
+  "오주환": {
+    "groupName": "사랑반",
+    "isSenior": false
+  },
+  "임경호": {
+    "groupName": "사랑반",
+    "isSenior": false
+  },
+  "김영숙": {
+    "groupName": "사랑반",
+    "isSenior": false
+  },
+  "김중순": {
+    "groupName": "사랑반",
+    "isSenior": true
+  },
+  "정국현": {
+    "groupName": "믿음반",
+    "isSenior": false
+  },
+  "김용숙": {
+    "groupName": "믿음반",
+    "isSenior": false
+  },
+  "강현애": {
+    "groupName": "믿음반",
+    "isSenior": false
+  },
+  "신은희": {
+    "groupName": "믿음반",
+    "isSenior": true
+  },
+  "정문조": {
+    "groupName": "소망반",
+    "isSenior": false
+  },
+  "김경애": {
+    "groupName": "소망반",
+    "isSenior": false
+  },
+  "박정희": {
+    "groupName": "소망반",
+    "isSenior": true
+  }
+}

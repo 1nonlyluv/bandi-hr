@@ -17,6 +17,7 @@ export type EmployeeDayRecord = {
   name: string;
   position: string;
   groupName: string;
+  isSenior?: boolean;
   dutyKind: DutyKind;
   leaveType?: LeaveType;
   rawCode: string;

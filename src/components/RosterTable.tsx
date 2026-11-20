@@ -33,7 +33,7 @@ export function RosterTable({ rows, mode, emptyText }: Props) {
               </span>
             </td>
             <td>{row.position || "-"}</td>
-            <td>{row.groupName || ""}</td>
+            <td>{row.groupName || ""}{row.groupName && row.isSenior ? " (선임)" : ""}</td>
             {mode === "off" ? <td>{row.leaveType ?? "-"}</td> : null}
           </tr>
         ))}
